@@ -1,0 +1,23 @@
+# Environment & IDE
+.env
+.env.local
+.env.*.local
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node / Build artifacts
+node_modules/
+dist/
+build/
+coverage/
+*.log
+
+# Antigravity artifacts (if inside workspace)
+.antigravity-ide/
