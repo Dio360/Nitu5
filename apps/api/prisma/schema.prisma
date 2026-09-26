@@ -160,6 +160,7 @@ model User {
   ratingsGot    Rating[]       @relation("Ratee")
   notifications Notification[]
   wallet        Wallet?
+  tickets       SupportTicket[]
 }
 
 model Vehicle {
@@ -329,4 +330,19 @@ model Notification {
   payload   Json?
   readAt    DateTime?
   createdAt DateTime      @default(now())
+}
+
+model SupportTicket {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  category  String   @default("HELP")
+  subject   String
+  message   String
+  tripId    String?
+  status    String   @default("OPEN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }

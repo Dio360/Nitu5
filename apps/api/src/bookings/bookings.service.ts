@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { computeEarnings } from "@nitu5/domain";
 import { PrismaService } from "../prisma.service";
+import { NotifyService } from "../notify/notify.service";
 
 const OPEN = ["BOOKING_OPEN", "CONFIRMED", "NEARLY_FULL"];
 
@@ -14,7 +15,10 @@ const COMMISSION: Record<string, number> = { SHARED: 0.1, PRIVATE: 0.15 };
 
 @Injectable()
 export class BookingsService {
-  constructor(private readonly db: PrismaService) {}
+  constructor(
+    private readonly db: PrismaService,
+    private readonly notify: NotifyService,
+  ) {}
 
   async offer(riderId: string, dto: { tripId: string; seats: number; offeredFareKobo: number; pickupLabel: string; dropoffLabel: string; paymentMethod: string }) {
     const trip = await this.db.trip.findUnique({ where: { id: dto.tripId } });
@@ -38,6 +42,7 @@ export class BookingsService {
     await this.db.negotiation.create({
       data: { bookingId: booking.id, actorId: riderId, amountKobo: dto.offeredFareKobo, action: "OFFER" },
     });
+    await this.notify.notify(trip.driverId, "NEW_OFFER", { bookingId: booking.id, tripId: trip.id });
     return booking;
   }
 
@@ -115,6 +120,11 @@ export class BookingsService {
       await tx.negotiation.create({
         data: { bookingId, actorId: userId, amountKobo: price, action: "ACCEPT" },
       });
+      const done = await tx.booking.findUnique({ where: { id: bookingId }, include: { trip: true } });
+      if (done) {
+        await this.notify.notify(done.riderId, "BOOKING_CONFIRMED", { bookingId, tripId: done.tripId });
+        await this.notify.notify(done.trip.driverId, "BOOKING_CONFIRMED", { bookingId, tripId: done.tripId });
+      }
       return updated;
     });
   }
@@ -145,6 +155,7 @@ export class BookingsService {
     await this.db.negotiation.create({
       data: { bookingId, actorId: driverId, amountKobo, action: "COUNTER" },
     });
+    await this.notify.notify(booking.riderId, "COUNTER_OFFER", { bookingId, amountKobo });
     return updated;
   }
 
@@ -159,6 +170,7 @@ export class BookingsService {
     await this.db.negotiation.create({
       data: { bookingId, actorId: driverId, amountKobo: booking.offeredFareKobo, action: "DECLINE" },
     });
+    await this.notify.notify(booking.riderId, "OFFER_DECLINED", { bookingId });
     return updated;
   }
 

@@ -19,6 +19,7 @@ import { SearchTripsDto } from "./search.dto";
 import { GeocodeService } from "./geocode.service";
 
 import { BookingsService } from "../bookings/bookings.service";
+import { NotifyService } from "../notify/notify.service";
 
 const DRIVER_ROLES = ["PRIVATE_DRIVER", "PROFESSIONAL_DRIVER"];
 const OPEN = ["BOOKING_OPEN", "CONFIRMED", "NEARLY_FULL"] as const;
@@ -37,6 +38,7 @@ export class TripsController {
     private readonly db: PrismaService,
     private readonly geo: GeocodeService,
     private readonly bookings: BookingsService,
+    private readonly notify: NotifyService,
   ) {}
 
   @Post()
@@ -108,6 +110,7 @@ export class TripsController {
       for (const b of trip.bookings) {
         if (b.status !== "CONFIRMED" && b.status !== "QR_VERIFIED") continue;
         await tx.booking.update({ where: { id: b.id }, data: { status: "CANCELLED" } });
+        await this.notify.notify(b.riderId, "TRIP_CANCELLED", { tripId: id });
         if (b.paymentMethod === "WALLET" && b.agreedFareKobo != null) {
           const wallet = await tx.wallet.upsert({
             where: { userId: b.riderId },
@@ -160,6 +163,9 @@ export class TripsController {
       where: { tripId: id, status: "QR_VERIFIED" },
       data: { status: "IN_PROGRESS" },
     });
+    for (const b of aboard) {
+      await this.notify.notify(b.riderId, "TRIP_STARTED", { tripId: id });
+    }
     return this.db.trip.update({ where: { id }, data: { status: "IN_PROGRESS" } });
   }
 
@@ -197,6 +203,11 @@ export class TripsController {
         data: { paymentStatus: "CASH_RECORDED" },
       });
       await tx.user.update({ where: { id: trip.driverId }, data: { tripsCompleted: { increment: 1 } } });
+      for (const b of trip.bookings) {
+        if (b.status === "IN_PROGRESS") {
+          await this.notify.notify(b.riderId, "TRIP_COMPLETED", { tripId: id, bookingId: b.id });
+        }
+      }
       return tx.trip.update({ where: { id }, data: { status: "COMPLETED" } });
     });
   }

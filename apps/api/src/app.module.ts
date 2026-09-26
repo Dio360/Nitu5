@@ -20,6 +20,10 @@ import { WalletController } from "./wallet/wallet.controller";
 import { EarningsController } from "./earnings/earnings.controller";
 import { RatingsController } from "./ratings/ratings.controller";
 import { PublicUsersController } from "./users/public.controller";
+import { NotifyService } from "./notify/notify.service";
+import { NotificationsController } from "./notify/notifications.controller";
+import { DisputesController } from "./disputes/disputes.controller";
+import { SupportController } from "./support/support.controller";
 import { VerificationController } from "./verification/verification.controller";
 
 @Module({
@@ -44,7 +48,10 @@ import { VerificationController } from "./verification/verification.controller";
     EarningsController,
     RatingsController,
     PublicUsersController,
+    NotificationsController,
+    DisputesController,
+    SupportController,
   ],
-  providers: [PrismaService, OtpService, AuthService, S3Service, GeocodeService, BookingsService, QrService],
+  providers: [PrismaService, OtpService, AuthService, S3Service, GeocodeService, BookingsService, QrService, NotifyService],
 })
 export class AppModule {}

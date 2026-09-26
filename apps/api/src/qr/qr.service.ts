@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { randomBytes } from "crypto";
 import { PrismaService } from "../prisma.service";
+import { NotifyService } from "../notify/notify.service";
 
 /**
  * Nitu5 QR check-in: Scan → Match → Confirm → Start (PRD §20).
@@ -14,7 +15,10 @@ import { PrismaService } from "../prisma.service";
  */
 @Injectable()
 export class QrService {
-  constructor(private readonly db: PrismaService) {}
+  constructor(
+    private readonly db: PrismaService,
+    private readonly notify: NotifyService,
+  ) {}
 
   async createSession(driverId: string, tripId: string) {
     const trip = await this.db.trip.findFirst({ where: { id: tripId, driverId } });
@@ -68,6 +72,7 @@ export class QrService {
               slaDueAt: new Date(Date.now() + 5 * 60 * 1000),
             },
           });
+          await this.notify.notify(userId, "QR_BLOCKED", { bookingId, tripId: booking.tripId });
         }
         throw new BadRequestException("Blocked after 2 failed scans — safety team notified");
       }
