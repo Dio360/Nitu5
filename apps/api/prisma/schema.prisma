@@ -248,6 +248,14 @@ model QrSession {
   updatedAt DateTime   @updatedAt
 }
 
+model QrAttempt {
+  id        String   @id @default(uuid())
+  bookingId String
+  createdAt DateTime @default(now())
+
+  @@index([bookingId, createdAt])
+}
+
 model SafetyReport {
   id         String       @id @default(uuid())
   tripId     String?

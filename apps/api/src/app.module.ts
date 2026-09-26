@@ -13,6 +13,9 @@ import { TripsController } from "./trips/trips.controller";
 import { GeocodeService } from "./trips/geocode.service";
 import { BookingsController } from "./bookings/bookings.controller";
 import { BookingsService } from "./bookings/bookings.service";
+import { QrController } from "./qr/qr.controller";
+import { QrService } from "./qr/qr.service";
+import { SafetyController } from "./safety/safety.controller";
 import { VerificationController } from "./verification/verification.controller";
 
 @Module({
@@ -31,7 +34,9 @@ import { VerificationController } from "./verification/verification.controller";
     TripsController,
     VerificationController,
     BookingsController,
+    QrController,
+    SafetyController,
   ],
-  providers: [PrismaService, OtpService, AuthService, S3Service, GeocodeService, BookingsService],
+  providers: [PrismaService, OtpService, AuthService, S3Service, GeocodeService, BookingsService, QrService],
 })
 export class AppModule {}

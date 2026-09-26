@@ -107,6 +107,75 @@ export class TripsController {
     return this.db.trip.update({ where: { id }, data: { status: "CANCELLED" } });
   }
 
+  /** "I'm here" — driver at the pickup point. */
+  @Post(":id/arriving")
+  @UseGuards(JwtGuard)
+  async arriving(@CurrentUser() me: AuthUser, @Param("id") id: string) {
+    const trip = await this.db.trip.findFirst({ where: { id, driverId: me.userId } });
+    if (!trip) throw new NotFoundException("Trip not found");
+    return this.db.trip.update({ where: { id }, data: { status: "DRIVER_ARRIVING" } });
+  }
+
+  /**
+   * Wheels rolling. Every confirmed seat must be QR-checked first,
+   * and at least one rider must be aboard.
+   */
+  @Post(":id/start")
+  @UseGuards(JwtGuard)
+  async start(@CurrentUser() me: AuthUser, @Param("id") id: string) {
+    const trip = await this.db.trip.findFirst({
+      where: { id, driverId: me.userId },
+      include: { bookings: true },
+    });
+    if (!trip) throw new NotFoundException("Trip not found");
+    const unverified = trip.bookings.filter((b) => b.status === "CONFIRMED");
+    if (unverified.length > 0) {
+      throw new BadRequestException(`${unverified.length} rider(s) still need QR check-in`);
+    }
+    const aboard = trip.bookings.filter((b) => b.status === "QR_VERIFIED");
+    if (aboard.length === 0) throw new BadRequestException("No checked-in riders — nobody to carry");
+    await this.db.booking.updateMany({
+      where: { tripId: id, status: "QR_VERIFIED" },
+      data: { status: "IN_PROGRESS" },
+    });
+    return this.db.trip.update({ where: { id }, data: { status: "IN_PROGRESS" } });
+  }
+
+  /** Journey done. Cash is marked received; digital settles in Phase E. */
+  @Post(":id/complete")
+  @UseGuards(JwtGuard)
+  async complete(@CurrentUser() me: AuthUser, @Param("id") id: string) {
+    const trip = await this.db.trip.findFirst({ where: { id, driverId: me.userId } });
+    if (!trip) throw new NotFoundException("Trip not found");
+    if (trip.status !== "IN_PROGRESS") throw new BadRequestException("Start the trip first");
+    await this.db.booking.updateMany({
+      where: { tripId: id, status: "IN_PROGRESS" },
+      data: { status: "COMPLETED" },
+    });
+    await this.db.booking.updateMany({
+      where: { tripId: id, paymentMethod: "CASH" },
+      data: { paymentStatus: "CASH_RECORDED" },
+    });
+    return this.db.trip.update({ where: { id }, data: { status: "COMPLETED" } });
+  }
+
+  /** Who is in my car? Driver-only passenger list (PRD §40). */
+  @Get(":id/manifest")
+  @UseGuards(JwtGuard)
+  async manifest(@CurrentUser() me: AuthUser, @Param("id") id: string) {
+    const trip = await this.db.trip.findFirst({ where: { id, driverId: me.userId } });
+    if (!trip) throw new NotFoundException("Trip not found");
+    return this.db.booking.findMany({
+      where: { tripId: id },
+      orderBy: { createdAt: "asc" },
+      include: {
+        rider: {
+          select: { firstName: true, lastName: true, rating: true, verificationTier: true },
+        },
+      },
+    });
+  }
+
   @Get("search")
   async search(@Query() q: SearchTripsDto) {
     const pax = q.seats ?? 1;
