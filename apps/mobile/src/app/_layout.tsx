@@ -27,6 +27,8 @@ const Gate: React.FC = () => {
       <Stack.Screen name="index" options={{ title: "Find a ride" }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="trip/[id]" options={{ title: "Trip" }} />
+      <Stack.Screen name="bookings" options={{ title: "My bookings" }} />
+      <Stack.Screen name="booking/[id]" options={{ title: "Booking" }} />
     </Stack>
   );
 };

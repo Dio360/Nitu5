@@ -43,7 +43,8 @@ export default function Search(): React.JSX.Element {
   return (
     <View style={s.wrap}>
       <Text style={s.hello}>
-        Hello {user?.firstName} · <Text style={s.link} onPress={logout}>log out</Text>
+        Hello {user?.firstName} · <Text style={s.link} onPress={() => router.push("/bookings")}>my bookings</Text> ·{" "}
+        <Text style={s.link} onPress={logout}>log out</Text>
       </Text>
       <View style={s.row}>
         <TextInput style={[s.input, s.half]} placeholder="From" value={from} onChangeText={setFrom} />
