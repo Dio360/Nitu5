@@ -18,6 +18,8 @@ import { CreateTripDto } from "./dto";
 import { SearchTripsDto } from "./search.dto";
 import { GeocodeService } from "./geocode.service";
 
+import { BookingsService } from "../bookings/bookings.service";
+
 const DRIVER_ROLES = ["PRIVATE_DRIVER", "PROFESSIONAL_DRIVER"];
 const OPEN = ["BOOKING_OPEN", "CONFIRMED", "NEARLY_FULL"] as const;
 
@@ -34,6 +36,7 @@ export class TripsController {
   constructor(
     private readonly db: PrismaService,
     private readonly geo: GeocodeService,
+    private readonly bookings: BookingsService,
   ) {}
 
   @Post()
@@ -156,6 +159,19 @@ export class TripsController {
     return trips
       .filter((t) => t.seatsTotal - t.seatsBooked >= pax)
       .map((t) => ({ ...t, seatsLeft: t.seatsTotal - t.seatsBooked }));
+  }
+
+  /** Driver sees all price offers on their trip. */
+  @Get(":id/offers")
+  @UseGuards(JwtGuard)
+  offers(@CurrentUser() me: AuthUser, @Param("id") id: string) {
+    return this.bookings.tripOffers(me.userId, id);
+  }
+
+  /** Public earnings preview before offering (PRD §32). */
+  @Get(":id/quote")
+  quote(@Param("id") id: string, @Query("amountKobo") amount: string) {
+    return this.bookings.quote(id, Number(amount));
   }
 
   @Get(":id")
