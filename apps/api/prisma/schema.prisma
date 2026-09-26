@@ -1,0 +1,324 @@
+// Nitu5 database blueprint v0.1 — mirrors docs/IMPLEMENTATION_PLAN.md §2.
+// Money is always Int kobo (never floats). Map points are PostGIS geometry.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+enum Role {
+  RIDER
+  PRIVATE_DRIVER
+  PROFESSIONAL_DRIVER
+  ADMIN
+  SUPPORT
+}
+
+enum DriverType {
+  PRIVATE
+  PROFESSIONAL
+}
+
+enum VerificationTier {
+  L0_NONE
+  L1_ACCOUNT
+  L2_IDENTITY
+  L3_DRIVER_VEHICLE
+  L4_FULLY_VERIFIED
+}
+
+enum RideModel {
+  SHARED
+  PRIVATE
+}
+
+enum TripType {
+  SCHEDULED
+  LEAVING_SOON
+  INSTANT
+}
+
+enum TripStatus {
+  PUBLISHED
+  SEARCHING
+  BOOKING_OPEN
+  CONFIRMED
+  NEARLY_FULL
+  FULL
+  DRIVER_ARRIVING
+  QR_VERIFIED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum BookingStatus {
+  OFFERED
+  COUNTERED
+  CONFIRMED
+  QR_VERIFIED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum OfferAction {
+  OFFER
+  COUNTER
+  ACCEPT
+  DECLINE
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  USSD
+  WALLET
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  HELD
+  REFUNDED
+  CASH_RECORDED
+}
+
+enum VehicleStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum QrVerdict {
+  PENDING
+  PASSED
+  FAILED
+  BLOCKED
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+enum DisputeStatus {
+  OPEN
+  EVIDENCE
+  REVIEW
+  DECIDED
+  CLOSED
+}
+
+enum LedgerType {
+  FARE
+  FEE
+  PAYOUT
+  REFUND
+  HOLD
+  RELEASE
+}
+
+enum NotifyChannel {
+  PUSH
+  SMS
+  IN_APP
+}
+
+model User {
+  id               String           @id @default(uuid())
+  phone            String           @unique
+  email            String?          @unique
+  firstName        String
+  lastName         String
+  role             Role             @default(RIDER)
+  driverType       DriverType?
+  verificationTier VerificationTier @default(L0_NONE)
+  rating           Float?
+  tripsCompleted   Int              @default(0)
+  avatarUrl        String?
+  trustedContacts  Json?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  vehicles      Vehicle[]
+  trips         Trip[]         @relation("DriverTrips")
+  bookings      Booking[]      @relation("RiderBookings")
+  negotiations  Negotiation[]
+  safetyReports SafetyReport[]
+  ratingsGiven  Rating[]       @relation("Rater")
+  ratingsGot    Rating[]       @relation("Ratee")
+  notifications Notification[]
+  wallet        Wallet?
+}
+
+model Vehicle {
+  id                 String        @id @default(uuid())
+  driverId           String
+  driver             User          @relation(fields: [driverId], references: [id])
+  make               String
+  model              String
+  colour             String
+  plate              String        @unique
+  category           String
+  capacity           Int
+  photos             String[]
+  verificationStatus VehicleStatus @default(PENDING)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+}
+
+model Trip {
+  id               String     @id @default(uuid())
+  driverId         String
+  driver           User       @relation("DriverTrips", fields: [driverId], references: [id])
+  rideModel        RideModel
+  tripType         TripType
+  originLabel      String
+  destinationLabel String
+  originGeom       Unsupported("geometry")?
+  corridorGeom     Unsupported("geometry")?
+  departureAt      DateTime
+  seatsTotal       Int
+  seatsBooked      Int        @default(0)
+  farePerSeatKobo  Int?
+  privateFareKobo  Int?
+  status           TripStatus @default(PUBLISHED)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  bookings Booking[]
+}
+
+model Booking {
+  id                 String         @id @default(uuid())
+  tripId             String
+  trip               Trip           @relation(fields: [tripId], references: [id])
+  riderId            String
+  rider              User           @relation("RiderBookings", fields: [riderId], references: [id])
+  seats              Int
+  pickupLabel        String
+  dropoffLabel       String
+  pickupGeom         Unsupported("geometry")?
+  dropoffGeom        Unsupported("geometry")?
+  offeredFareKobo    Int
+  agreedFareKobo     Int?
+  commissionKobo     Int            @default(0)
+  driverEarningsKobo Int            @default(0)
+  paymentMethod      PaymentMethod
+  paymentStatus      PaymentStatus  @default(PENDING)
+  status             BookingStatus  @default(OFFERED)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  negotiations Negotiation[]
+  disputes     Dispute[]
+}
+
+model Negotiation {
+  id        String      @id @default(uuid())
+  bookingId String
+  booking   Booking     @relation(fields: [bookingId], references: [id])
+  actorId   String
+  actor     User        @relation(fields: [actorId], references: [id])
+  amountKobo Int
+  action    OfferAction
+  createdAt DateTime    @default(now())
+}
+
+model QrSession {
+  id        String     @id @default(uuid())
+  tripId    String
+  bookingId String?
+  nonce     String     @unique
+  expiresAt DateTime
+  attempts  Int        @default(0)
+  verdict   QrVerdict  @default(PENDING)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model SafetyReport {
+  id         String       @id @default(uuid())
+  tripId     String?
+  reporterId String
+  reporter   User         @relation(fields: [reporterId], references: [id])
+  category   String
+  severity   String       @default("normal")
+  status     ReportStatus @default(OPEN)
+  slaDueAt   DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Dispute {
+  id          String        @id @default(uuid())
+  bookingId   String
+  booking     Booking       @relation(fields: [bookingId], references: [id])
+  type        String
+  evidence    Json?
+  holdKobo    Int?
+  status      DisputeStatus @default(OPEN)
+  decision    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Wallet {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  balanceKobo Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  entries LedgerEntry[]
+}
+
+model LedgerEntry {
+  id             String     @id @default(uuid())
+  walletId       String?
+  wallet         Wallet?    @relation(fields: [walletId], references: [id])
+  bookingId      String?
+  debitKobo      Int        @default(0)
+  creditKobo     Int        @default(0)
+  type           LedgerType
+  idempotencyKey String     @unique
+  createdAt      DateTime   @default(now())
+}
+
+model Rating {
+  id        String   @id @default(uuid())
+  tripId    String
+  raterId   String
+  rater     User     @relation("Rater", fields: [raterId], references: [id])
+  rateeId   String
+  ratee     User     @relation("Ratee", fields: [rateeId], references: [id])
+  score     Int
+  scores    Json?
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@unique([tripId, raterId])
+}
+
+model Notification {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  channel   NotifyChannel
+  template  String
+  payload   Json?
+  readAt    DateTime?
+  createdAt DateTime      @default(now())
+}
