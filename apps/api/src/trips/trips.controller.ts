@@ -98,13 +98,35 @@ export class TripsController {
     });
   }
 
-  /** Driver cancels their own trip. */
+  /** Driver cancels their own trip. Wallet holds are refunded. */
   @Post(":id/cancel")
   @UseGuards(JwtGuard)
   async cancel(@CurrentUser() me: AuthUser, @Param("id") id: string) {
-    const trip = await this.db.trip.findFirst({ where: { id, driverId: me.userId } });
-    if (!trip) throw new NotFoundException("Trip not found");
-    return this.db.trip.update({ where: { id }, data: { status: "CANCELLED" } });
+    return this.db.$transaction(async (tx) => {
+      const trip = await tx.trip.findFirst({ where: { id, driverId: me.userId }, include: { bookings: true } });
+      if (!trip) throw new NotFoundException("Trip not found");
+      for (const b of trip.bookings) {
+        if (b.status !== "CONFIRMED" && b.status !== "QR_VERIFIED") continue;
+        await tx.booking.update({ where: { id: b.id }, data: { status: "CANCELLED" } });
+        if (b.paymentMethod === "WALLET" && b.agreedFareKobo != null) {
+          const wallet = await tx.wallet.upsert({
+            where: { userId: b.riderId },
+            update: { balanceKobo: { increment: b.agreedFareKobo } },
+            create: { userId: b.riderId, balanceKobo: b.agreedFareKobo },
+          });
+          await tx.ledgerEntry.create({
+            data: {
+              walletId: wallet.id,
+              bookingId: b.id,
+              creditKobo: b.agreedFareKobo,
+              type: "RELEASE",
+              idempotencyKey: `release-${b.id}`,
+            },
+          });
+        }
+      }
+      return tx.trip.update({ where: { id }, data: { status: "CANCELLED" } });
+    });
   }
 
   /** "I'm here" — driver at the pickup point. */
@@ -141,22 +163,42 @@ export class TripsController {
     return this.db.trip.update({ where: { id }, data: { status: "IN_PROGRESS" } });
   }
 
-  /** Journey done. Cash is marked received; digital settles in Phase E. */
+  /** Journey done. Wallet drivers get paid; cash is marked received. */
   @Post(":id/complete")
   @UseGuards(JwtGuard)
   async complete(@CurrentUser() me: AuthUser, @Param("id") id: string) {
-    const trip = await this.db.trip.findFirst({ where: { id, driverId: me.userId } });
-    if (!trip) throw new NotFoundException("Trip not found");
-    if (trip.status !== "IN_PROGRESS") throw new BadRequestException("Start the trip first");
-    await this.db.booking.updateMany({
-      where: { tripId: id, status: "IN_PROGRESS" },
-      data: { status: "COMPLETED" },
+    return this.db.$transaction(async (tx) => {
+      const trip = await tx.trip.findFirst({ where: { id, driverId: me.userId }, include: { bookings: true } });
+      if (!trip) throw new NotFoundException("Trip not found");
+      if (trip.status !== "IN_PROGRESS") throw new BadRequestException("Start the trip first");
+      for (const b of trip.bookings) {
+        if (b.status !== "IN_PROGRESS") continue;
+        await tx.booking.update({ where: { id: b.id }, data: { status: "COMPLETED" } });
+        if (b.paymentMethod === "WALLET") {
+          const wallet = await tx.wallet.upsert({
+            where: { userId: trip.driverId },
+            update: { balanceKobo: { increment: b.driverEarningsKobo } },
+            create: { userId: trip.driverId, balanceKobo: b.driverEarningsKobo },
+          });
+          await tx.ledgerEntry.create({
+            data: {
+              walletId: wallet.id,
+              bookingId: b.id,
+              creditKobo: b.driverEarningsKobo,
+              type: "PAYOUT",
+              idempotencyKey: `payout-${b.id}`,
+            },
+          });
+        }
+        await tx.user.update({ where: { id: b.riderId }, data: { tripsCompleted: { increment: 1 } } });
+      }
+      await tx.booking.updateMany({
+        where: { tripId: id, paymentMethod: "CASH" },
+        data: { paymentStatus: "CASH_RECORDED" },
+      });
+      await tx.user.update({ where: { id: trip.driverId }, data: { tripsCompleted: { increment: 1 } } });
+      return tx.trip.update({ where: { id }, data: { status: "COMPLETED" } });
     });
-    await this.db.booking.updateMany({
-      where: { tripId: id, paymentMethod: "CASH" },
-      data: { paymentStatus: "CASH_RECORDED" },
-    });
-    return this.db.trip.update({ where: { id }, data: { status: "COMPLETED" } });
   }
 
   /** Who is in my car? Driver-only passenger list (PRD §40). */

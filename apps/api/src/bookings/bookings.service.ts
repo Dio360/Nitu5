@@ -71,6 +71,30 @@ export class BookingsService {
       const left = booking.trip.seatsTotal - booking.trip.seatsBooked;
       if (left < booking.seats) throw new BadRequestException("Just sold out — not enough seats left");
       const split = computeEarnings(price, COMMISSION[booking.trip.rideModel] ?? 0.1);
+      // Wallet riders pay now (held); cash/card pay outside the app for now.
+      if (booking.paymentMethod === "WALLET") {
+        const wallet = await tx.wallet.upsert({
+          where: { userId: booking.riderId },
+          update: {},
+          create: { userId: booking.riderId },
+        });
+        if (wallet.balanceKobo < split.fare.kobo) {
+          throw new BadRequestException("Wallet too low — top up first");
+        }
+        await tx.wallet.update({
+          where: { id: wallet.id },
+          data: { balanceKobo: { decrement: split.fare.kobo } },
+        });
+        await tx.ledgerEntry.create({
+          data: {
+            walletId: wallet.id,
+            bookingId,
+            debitKobo: split.fare.kobo,
+            type: "HOLD",
+            idempotencyKey: `hold-${bookingId}`,
+          },
+        });
+      }
       const updated = await tx.booking.update({
         where: { id: bookingId },
         data: {

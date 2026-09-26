@@ -16,6 +16,10 @@ import { BookingsService } from "./bookings/bookings.service";
 import { QrController } from "./qr/qr.controller";
 import { QrService } from "./qr/qr.service";
 import { SafetyController } from "./safety/safety.controller";
+import { WalletController } from "./wallet/wallet.controller";
+import { EarningsController } from "./earnings/earnings.controller";
+import { RatingsController } from "./ratings/ratings.controller";
+import { PublicUsersController } from "./users/public.controller";
 import { VerificationController } from "./verification/verification.controller";
 
 @Module({
@@ -36,6 +40,10 @@ import { VerificationController } from "./verification/verification.controller";
     BookingsController,
     QrController,
     SafetyController,
+    WalletController,
+    EarningsController,
+    RatingsController,
+    PublicUsersController,
   ],
   providers: [PrismaService, OtpService, AuthService, S3Service, GeocodeService, BookingsService, QrService],
 })
