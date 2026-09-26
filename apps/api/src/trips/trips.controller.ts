@@ -10,20 +10,35 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma.service";
 import { CurrentUser } from "../auth/current-user";
 import { AuthUser, JwtGuard } from "../auth/jwt.guard";
-import { CreateTripDto, SearchTripsDto } from "./dto";
+import { CreateTripDto } from "./dto";
+import { SearchTripsDto } from "./search.dto";
+import { GeocodeService } from "./geocode.service";
 
 const DRIVER_ROLES = ["PRIVATE_DRIVER", "PROFESSIONAL_DRIVER"];
+const OPEN = ["BOOKING_OPEN", "CONFIRMED", "NEARLY_FULL"] as const;
+
+const DRIVER_SELECT = {
+  firstName: true,
+  lastName: true,
+  rating: true,
+  verificationTier: true,
+  driverType: true,
+} as const;
 
 @Controller("trips")
 export class TripsController {
-  constructor(private readonly db: PrismaService) {}
+  constructor(
+    private readonly db: PrismaService,
+    private readonly geo: GeocodeService,
+  ) {}
 
   @Post()
   @UseGuards(JwtGuard)
-  create(@CurrentUser() me: AuthUser, @Body() dto: CreateTripDto) {
+  async create(@CurrentUser() me: AuthUser, @Body() dto: CreateTripDto) {
     if (!DRIVER_ROLES.includes(me.role)) {
       throw new ForbiddenException("Switch to a driver account first (PATCH /me)");
     }
@@ -33,7 +48,7 @@ export class TripsController {
     if (dto.rideModel === "PRIVATE" && dto.privateFareKobo == null) {
       throw new BadRequestException("Private trips need privateFareKobo (whole-car price)");
     }
-    return this.db.trip.create({
+    const trip = await this.db.trip.create({
       data: {
         driverId: me.userId,
         rideModel: dto.rideModel,
@@ -47,26 +62,100 @@ export class TripsController {
         status: "BOOKING_OPEN",
       },
     });
+    // Map points: GPS from the phone wins; address lookup is a fallback.
+    const from =
+      dto.originLat != null && dto.originLng != null
+        ? { lat: dto.originLat, lng: dto.originLng }
+        : await this.geo.geocode(dto.originLabel);
+    const to =
+      dto.destLat != null && dto.destLng != null
+        ? { lat: dto.destLat, lng: dto.destLng }
+        : await this.geo.geocode(dto.destinationLabel);
+    if (from) {
+      await this.db.$executeRaw`
+        UPDATE "Trip" SET "originGeom" = ST_SetSRID(ST_MakePoint(${from.lng}, ${from.lat}), 4326)
+        WHERE id = ${trip.id}`;
+    }
+    if (to) {
+      await this.db.$executeRaw`
+        UPDATE "Trip" SET "corridorGeom" = ST_SetSRID(ST_MakePoint(${to.lng}, ${to.lat}), 4326)
+        WHERE id = ${trip.id}`;
+    }
+    return this.db.trip.findUnique({ where: { id: trip.id } });
   }
 
-  /** Public search — label match for now, map matching lands in Phase B. */
-  @Get("search")
-  search(@Query() q: SearchTripsDto) {
+  /** My trips as a driver (newest first). */
+  @Get("mine")
+  @UseGuards(JwtGuard)
+  mine(@CurrentUser() me: AuthUser) {
     return this.db.trip.findMany({
+      where: { driverId: me.userId },
+      orderBy: { departureAt: "desc" },
+      take: 50,
+    });
+  }
+
+  /** Driver cancels their own trip. */
+  @Post(":id/cancel")
+  @UseGuards(JwtGuard)
+  async cancel(@CurrentUser() me: AuthUser, @Param("id") id: string) {
+    const trip = await this.db.trip.findFirst({ where: { id, driverId: me.userId } });
+    if (!trip) throw new NotFoundException("Trip not found");
+    return this.db.trip.update({ where: { id }, data: { status: "CANCELLED" } });
+  }
+
+  @Get("search")
+  async search(@Query() q: SearchTripsDto) {
+    const pax = q.seats ?? 1;
+    const day = q.date ? new Date(`${q.date}T00:00:00Z`) : null;
+    const dayEnd = q.date ? new Date(`${q.date}T23:59:59Z`) : null;
+
+    // Map search: rank by distance from the rider's point.
+    if (q.fromLat != null && q.fromLng != null) {
+      const radiusM = Math.round((q.radiusKm ?? 5) * 1000);
+      const rows = await this.db.$queryRaw<Array<{ id: string; meters: number }>>`
+        SELECT id,
+          ST_Distance("originGeom"::geography,
+            ST_SetSRID(ST_MakePoint(${q.fromLng}, ${q.fromLat}), 4326)::geography) AS meters
+        FROM "Trip"
+        WHERE status::text IN (${Prisma.join(OPEN as unknown as string[])})
+          AND "departureAt" >= NOW()
+          AND ("seatsTotal" - "seatsBooked") >= ${pax}
+          AND "originGeom" IS NOT NULL
+          AND ST_DWithin("originGeom"::geography,
+            ST_SetSRID(ST_MakePoint(${q.fromLng}, ${q.fromLat}), 4326)::geography, ${radiusM})
+        ORDER BY meters ASC
+        LIMIT 30`;
+      const trips = await this.db.trip.findMany({
+        where: { id: { in: rows.map((r) => r.id) } },
+        include: { driver: { select: DRIVER_SELECT } },
+      });
+      const byId = new Map(trips.map((t) => [t.id, t]));
+      return rows
+        .map((r) => {
+          const t = byId.get(r.id);
+          return t ? { ...t, distanceMeters: Math.round(r.meters), seatsLeft: t.seatsTotal - t.seatsBooked } : null;
+        })
+        .filter((t): t is NonNullable<typeof t> => t !== null);
+    }
+
+    // Label search (default).
+    const trips = await this.db.trip.findMany({
       where: {
-        status: { in: ["BOOKING_OPEN", "CONFIRMED", "NEARLY_FULL"] },
-        departureAt: { gte: new Date() },
+        status: { in: [...OPEN] },
+        departureAt: { gte: day ?? new Date(), ...(dayEnd ? { lte: dayEnd } : {}) },
         ...(q.from ? { originLabel: { contains: q.from, mode: "insensitive" } } : {}),
         ...(q.to ? { destinationLabel: { contains: q.to, mode: "insensitive" } } : {}),
+        ...(q.rideModel ? { rideModel: q.rideModel } : {}),
+        ...(q.tripType ? { tripType: q.tripType } : {}),
       },
       orderBy: { departureAt: "asc" },
       take: 30,
-      include: {
-        driver: {
-          select: { firstName: true, lastName: true, rating: true, verificationTier: true, driverType: true },
-        },
-      },
+      include: { driver: { select: DRIVER_SELECT } },
     });
+    return trips
+      .filter((t) => t.seatsTotal - t.seatsBooked >= pax)
+      .map((t) => ({ ...t, seatsLeft: t.seatsTotal - t.seatsBooked }));
   }
 
   @Get(":id")
@@ -74,13 +163,11 @@ export class TripsController {
     const trip = await this.db.trip.findUnique({
       where: { id },
       include: {
-        driver: {
-          select: { firstName: true, lastName: true, rating: true, verificationTier: true, driverType: true },
-        },
+        driver: { select: DRIVER_SELECT },
         bookings: { select: { id: true, seats: true, status: true } },
       },
     });
     if (!trip) throw new NotFoundException("Trip not found");
-    return trip;
+    return { ...trip, seatsLeft: trip.seatsTotal - trip.seatsBooked };
   }
 }

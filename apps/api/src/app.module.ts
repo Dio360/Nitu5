@@ -10,6 +10,7 @@ import { VehiclesController } from "./vehicles/vehicles.controller";
 import { UploadsController } from "./uploads/uploads.controller";
 import { S3Service } from "./uploads/s3.service";
 import { TripsController } from "./trips/trips.controller";
+import { GeocodeService } from "./trips/geocode.service";
 import { VerificationController } from "./verification/verification.controller";
 
 @Module({
@@ -28,6 +29,6 @@ import { VerificationController } from "./verification/verification.controller";
     TripsController,
     VerificationController,
   ],
-  providers: [PrismaService, OtpService, AuthService, S3Service],
+  providers: [PrismaService, OtpService, AuthService, S3Service, GeocodeService],
 })
 export class AppModule {}

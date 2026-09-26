@@ -1,7 +1,9 @@
+import { Type } from "class-transformer";
 import {
   IsDateString,
   IsIn,
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
@@ -41,6 +43,27 @@ export class CreateTripDto {
   @IsInt()
   @Min(0)
   privateFareKobo?: number;
+
+  /** GPS points from the phone (preferred — no lookup needed). */
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  originLat?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  originLng?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  destLat?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  destLng?: number;
 }
 
 export class SearchTripsDto {
