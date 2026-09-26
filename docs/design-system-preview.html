@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nitu5 Design System Preview</title>
+<style>
+  :root{
+    --piggy:#0D60D8; --piggy-dark:#0A4CB0; --navy:#062863;
+    --cream:#FFF9EF; --card:#FFFFFF; --ink:#000000;
+    --pink:#FF90E8; --yellow:#FFC900; --mint:#B8F1CC; --sky:#E7F0FE;
+    --sos:#E02020; --muted:#5A6B87;
+    --radius:16px;
+    --brutal:2px solid #000; --shadow:5px 5px 0 #000; --shadow-sm:3px 3px 0 #000;
+  }
+  *{box-sizing:border-box} body{margin:0;font-family:Inter,Plus Jakarta Sans,Segoe UI,Arial,sans-serif;background:var(--cream);color:var(--ink)}
+  .wrap{max-width:1100px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:34px;margin:0;letter-spacing:-.02em} .sub{color:var(--muted);margin:8px 0 24px}
+  .grid{display:grid;gap:20px} @media(min-width:900px){.grid2{grid-template-columns:1fr 1fr}}
+  .card{background:var(--card);border:var(--brutal);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .card h3{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:.1em}
+  .card h3 span{background:var(--yellow);border:2px solid #000;border-radius:8px;padding:2px 8px;box-shadow:var(--shadow-sm)}
+  .swatches{display:flex;gap:12px;flex-wrap:wrap}
+  .sw{width:148px;border:var(--brutal);border-radius:12px;overflow:hidden;background:#fff;box-shadow:var(--shadow-sm)}
+  .sw i{display:block;height:60px;border-bottom:var(--brutal)} .sw b{display:block;padding:8px 10px;font-size:13px} .sw span{display:block;padding:0 10px 10px;color:var(--muted);font-size:12px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border-radius:12px;border:var(--brutal);font-weight:800;cursor:pointer;margin:4px 6px 4px 0;box-shadow:var(--shadow-sm);transition:transform .05s}
+  .btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #000}
+  .btn-primary{background:var(--piggy);color:#fff} .btn-pink{background:var(--pink);color:#000}
+  .btn-yellow{background:var(--yellow);color:#000} .btn-ghost{background:#fff;color:#000}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;border:var(--brutal);background:#fff;margin:2px 4px 2px 0;box-shadow:2px 2px 0 #000}
+  .b-blue{background:var(--piggy);color:#fff} .b-pink{background:var(--pink);color:#000}
+  .b-yellow{background:var(--yellow);color:#000} .b-mint{background:var(--mint);color:#000} .b-navy{background:var(--navy);color:#fff}
+  .trip{border:var(--brutal);border-radius:var(--radius);overflow:hidden;background:#fff;box-shadow:var(--shadow)}
+  .trip-top{padding:16px;border-bottom:var(--brutal);background:var(--sky)} .route{font-size:20px;font-weight:900}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;color:#24365c;font-size:13px;font-weight:600}
+  .trip-body{padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .fare{font-size:24px;font-weight:900} .fare em{font-style:normal;background:var(--yellow);border:2px solid #000;border-radius:8px;padding:0 8px} .per{color:var(--muted);font-size:13px}
+  .sheet{background:var(--navy);color:#fff;border:var(--brutal);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
+  .bar{height:12px;background:#fff;border:var(--brutal);border-radius:999px;overflow:hidden;margin:12px 0} .bar i{display:block;height:100%;width:65%;background:linear-gradient(90deg,var(--pink),var(--yellow))}
+  .qr-hero{background:var(--piggy);color:#fff;border:var(--brutal);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .qr-steps{display:flex;gap:10px;margin-top:12px} .qr-steps div{flex:1;text-align:center;padding:10px 4px;border-radius:12px;font-size:13px;font-weight:900;border:var(--brutal);box-shadow:var(--shadow-sm)}
+  .qr-steps .s1{background:var(--pink);color:#000} .qr-steps .s2{background:var(--yellow);color:#000} .qr-steps .s3{background:#fff;color:#000} .qr-steps .s4{background:var(--mint);color:#000}
+  .sos{position:sticky;bottom:16px;display:flex;justify-content:center;margin-top:24px}
+  .sos button{background:var(--sos);color:#fff;border:var(--brutal);font-weight:900;font-size:16px;padding:14px 28px;border-radius:999px;box-shadow:var(--shadow);cursor:pointer}
+  code{background:#fff;border:2px solid #000;border-radius:6px;padding:1px 6px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="badge b-pink">✦ Nitu5 Design System v0.3</p>
+  <h1>Bold. Friendly. Made for the road.</h1>
+  <p class="sub">Nitu5's own look — chunky outlines, playful stickers, confident blues. Refresh <code>localhost:8080/design-system-preview</code>.</p>
+
+  <div class="grid grid2">
+    <div class="card"><h3><span>Tokens</span></h3>
+      <div class="swatches">
+        <div class="sw"><i style="background:#0D60D8"></i><b>Nitu Blue</b><span>#0D60D8 · primary</span></div>
+        <div class="sw"><i style="background:#062863"></i><b>Deep Navy</b><span>#062863 · sheets</span></div>
+        <div class="sw"><i style="background:#FF90E8"></i><b>Pop Pink</b><span>#FF90E8 · youthful</span></div>
+        <div class="sw"><i style="background:#FFC900"></i><b>Sun Yellow</b><span>#FFC900 · highlights</span></div>
+        <div class="sw"><i style="background:#FFF9EF"></i><b>Cream</b><span>#FFF9EF · app bg</span></div>
+        <div class="sw"><i style="background:#B8F1CC"></i><b>Mint</b><span>#B8F1CC · success</span></div>
+      </div>
+      <div style="margin-top:14px"><span class="btn btn-primary">Find shared ride</span><span class="btn btn-pink">₦3,000 / seat</span><span class="btn btn-ghost">Negotiate</span></div>
+      <div style="margin-top:10px"><span class="badge b-blue">✓ Identity Verified</span><span class="badge b-mint">🚗 Vehicle Verified</span><span class="badge b-yellow">⭐ Trusted Driver</span><span class="badge b-navy">🛡 Fully Verified</span><span class="badge">🆕 New</span></div>
+    </div>
+    <div class="trip">
+      <div class="trip-top">
+        <div class="route">Lekki → Ikeja · 7:00 AM</div>
+        <div class="meta"><span>John A. ⭐ 4.9 · 127 trips</span><span>✓ Fully Verified</span><span>Private Driver</span><span>Corolla · LSD-456XA</span></div>
+        <div style="margin-top:10px"><span class="badge b-mint">On-route: Yaba</span><span class="badge b-yellow">3 seats left</span><span class="badge b-pink">Scheduled</span></div>
+      </div>
+      <div class="trip-body"><div><div class="fare"><em>₦3,000</em> <span class="per">/ seat</span></div><div class="per">Suggested ₦2,500–₦3,200 · negotiable</div></div><div><span class="btn btn-primary">Book seat</span></div></div>
+    </div>
+  </div>
+
+  <div style="height:20px"></div>
+  <div class="grid grid2">
+    <div class="card"><h3><span>Fare sheet</span></h3>
+      <div class="sheet">
+        <div style="font-weight:900">Nitu5 suggested: ₦2,500 – ₦3,200</div>
+        <div class="bar"><i></i></div>
+        <div>Rider offers: <b>₦2,700</b> · Driver: <b style="background:var(--mint);color:#000;border-radius:6px;padding:0 6px;">Accept</b></div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><span class="btn btn-pink">Accept ₦2,700</span><span class="btn btn-yellow">Counter</span></div>
+        <div style="color:#9DB4D8;font-size:12px;margin-top:8px">Agreed fare becomes immutable booking record.</div>
+      </div>
+      <div style="margin-top:12px;border:var(--brutal);border-radius:12px;padding:12px;background:var(--sky)">
+        <b>Earnings card</b><div style="font-size:14px;margin-top:6px">Fare ₦5,000 · Fee ₦500 · <b>Driver nets ₦4,500</b></div>
+      </div>
+    </div>
+    <div>
+      <div class="qr-hero">
+        <div style="font-weight:900;font-size:19px">✨ Nitu5 QR — Scan → Match → Confirm → Start</div>
+        <div style="opacity:.9;font-size:14px">Sticker steps on bold blue — verification feels fun.</div>
+        <div class="qr-steps"><div class="s1">1 Scan</div><div class="s2">2 Match</div><div class="s3">3 Confirm</div><div class="s4">4 Start 🎉</div></div>
+      </div>
+      <div class="card" style="margin-top:20px"><h3><span>Safety</span></h3>
+        <div><span class="badge b-navy">● SOS</span><span class="badge">◎ Live tracking</span><span class="badge">↗ Share trip</span><span class="badge b-pink">✉ “I’ve arrived”</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sos"><button>SOS — hold for 2s (always accessible)</button></div>
+</div>
+</body>
+</html>

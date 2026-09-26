@@ -1,0 +1,21 @@
+/* Nitu5 Design Tokens v0.3 as CSS variables (web/admin). */
+:root {
+  --nitu-blue: #0d60d8;
+  --nitu-blue-dark: #0a4cb0;
+  --deep-navy: #062863;
+  --pop-pink: #ff90e8;
+  --sun-yellow: #ffc900;
+  --mint: #b8f1cc;
+  --cream: #fff9ef;
+  --sky-tint: #e7f0fe;
+  --ink: #000000;
+  --muted: #5a6b87;
+  --sos-red: #e02020;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --brutal-border: 2px solid #000;
+  --brutal-shadow: 5px 5px 0 #000;
+  --brutal-shadow-sm: 3px 3px 0 #000;
+}
