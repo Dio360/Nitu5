@@ -117,7 +117,7 @@ const s = StyleSheet.create({
     elevation: 4,
   },
   route: { fontSize: 20, fontWeight: "900" },
-  meta: { fontSize: 14, color: "#5A6B87", marginTop: 4 },
+  meta: { fontSize: 14, color: "#6F6455", marginTop: 4 },
   fare: { fontSize: 22, fontWeight: "900", marginTop: 8 },
   dname: { fontSize: 17, fontWeight: "800", marginBottom: 8 },
   input: {
@@ -133,5 +133,5 @@ const s = StyleSheet.create({
   pay: { flex: 1, borderWidth: 2, borderColor: "#000", borderRadius: 12, padding: 10, alignItems: "center" },
   payOn: { backgroundColor: "#FFC900" },
   paytxt: { fontWeight: "800" },
-  msg: { marginTop: 10, fontWeight: "700", color: "#0D60D8" },
+  msg: { marginTop: 10, fontWeight: "700", color: "#000" },
 });

@@ -105,8 +105,8 @@ export default function Profile(): React.JSX.Element {
 
       <View style={s.card}>
         <Text style={s.dname}>I am a…</Text>
-        <Btn title="Rider" kind={me?.role === "RIDER" ? "blue" : "ghost"} onPress={() => switchRole("RIDER")} />
-        <Btn title="Driver" kind={me?.role !== "RIDER" ? "blue" : "ghost"} onPress={() => switchRole("PRIVATE_DRIVER")} />
+        <Btn title="Rider" kind={me?.role === "RIDER" ? "dark" : "ghost"} onPress={() => switchRole("RIDER")} />
+        <Btn title="Driver" kind={me?.role !== "RIDER" ? "dark" : "ghost"} onPress={() => switchRole("PRIVATE_DRIVER")} />
       </View>
 
       <View style={s.card}>
@@ -149,7 +149,7 @@ const s = StyleSheet.create({
   },
   title: { fontSize: 20, fontWeight: "900" },
   dname: { fontSize: 17, fontWeight: "800", marginBottom: 8 },
-  meta: { fontSize: 13, color: "#5A6B87", marginTop: 2 },
+  meta: { fontSize: 13, color: "#6F6455", marginTop: 2 },
   input: {
     borderWidth: 2,
     borderColor: "#000",

@@ -72,7 +72,7 @@ export default function Drive(): React.JSX.Element {
 
 const s = StyleSheet.create({
   wrap: { flex: 1, padding: 16, backgroundColor: "#FFF9EF" },
-  empty: { textAlign: "center", color: "#5A6B87", marginTop: 32 },
+  empty: { textAlign: "center", color: "#6F6455", marginTop: 32 },
   card: {
     backgroundColor: "#fff",
     borderWidth: 2,
@@ -87,6 +87,6 @@ const s = StyleSheet.create({
   },
   title: { fontSize: 20, fontWeight: "900" },
   route: { fontSize: 17, fontWeight: "800" },
-  meta: { fontSize: 13, color: "#5A6B87", marginTop: 2 },
+  meta: { fontSize: 13, color: "#6F6455", marginTop: 2 },
   status: { fontSize: 15, fontWeight: "900", marginTop: 6 },
 });

@@ -16,6 +16,7 @@ export default function Search(): React.JSX.Element {
   const { user } = useAuth();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [ride, setRide] = useState<"ALL" | "SHARED" | "PRIVATE">("ALL");
   const [trips, setTrips] = useState<Trip[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -27,6 +28,7 @@ export default function Search(): React.JSX.Element {
       const parts: string[] = [];
       if (from.trim()) parts.push(`from=${encodeURIComponent(from.trim())}`);
       if (to.trim()) parts.push(`to=${encodeURIComponent(to.trim())}`);
+      if (ride !== "ALL") parts.push(`rideModel=${ride}`);
       const qs = parts.length ? `?${parts.join("&")}` : "";
       setTrips(await api<Trip[]>(`/trips/search${qs}`));
     } catch (e) {
@@ -34,7 +36,7 @@ export default function Search(): React.JSX.Element {
     } finally {
       setBusy(false);
     }
-  }, [from, to]);
+  }, [from, to, ride]);
 
   useFocusEffect(
     useCallback(() => {
@@ -59,7 +61,7 @@ export default function Search(): React.JSX.Element {
           <Text style={s.topbtntxt}>My bookings</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[s.topbtn, s.topdrive]} onPress={() => router.push("/drive")}>
-          <Text style={s.topbtntxt}>Drive</Text>
+          <Text style={[s.topbtntxt, s.topdrivetxt]}>Drive</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[s.topbtn, s.topghost]} onPress={() => router.push("/profile")}>
           <Text style={[s.topbtntxt, s.topghosttxt]}>Me</Text>
@@ -68,6 +70,13 @@ export default function Search(): React.JSX.Element {
       <View style={s.row}>
         <TextInput style={[s.input, s.half]} placeholder="From" value={from} onChangeText={setFrom} />
         <TextInput style={[s.input, s.half]} placeholder="To" value={to} onChangeText={setTo} />
+      </View>
+      <View style={s.row}>
+        {(["ALL", "SHARED", "PRIVATE"] as const).map((r) => (
+          <TouchableOpacity key={r} style={[s.pick, ride === r && s.pickOn]} onPress={() => setRide(r)}>
+            <Text style={s.picktxt}>{r === "ALL" ? "All" : r === "SHARED" ? "Shared" : "Private"}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
       <Btn title={busy ? "Searching…" : "Find rides"} onPress={search} disabled={busy} />
       {error ? <Text style={s.error}>{error}</Text> : null}
@@ -103,7 +112,7 @@ export default function Search(): React.JSX.Element {
 const s = StyleSheet.create({
   wrap: { flex: 1, padding: 16, backgroundColor: "#FFF9EF" },
   hello: { fontSize: 24, fontWeight: "900" },
-  sub: { fontSize: 15, color: "#5A6B87", marginBottom: 12 },
+  sub: { fontSize: 15, color: "#6F6455", marginBottom: 12 },
   toprow: { flexDirection: "row", gap: 10, marginBottom: 14 },
   topbtn: {
     flex: 1,
@@ -115,10 +124,14 @@ const s = StyleSheet.create({
   topghost: { backgroundColor: "#fff", borderWidth: 2, borderColor: "#000" },
   topbtntxt: { color: "#fff", fontSize: 16, fontWeight: "800" },
   topghosttxt: { color: "#000" },
-  topdrive: { backgroundColor: "#0D60D8" },
+  topdrive: { backgroundColor: "#FFC900" },
+  topdrivetxt: { color: "#000" },
   error: { color: "#E02020", fontWeight: "700", marginTop: 8 },
-  count: { color: "#5A6B87", fontWeight: "700", marginTop: 8 },
+  count: { color: "#6F6455", fontWeight: "700", marginTop: 8 },
   row: { flexDirection: "row", gap: 8 },
+  pick: { flex: 1, borderWidth: 2, borderColor: "#000", borderRadius: 12, padding: 10, alignItems: "center", marginBottom: 12 },
+  pickOn: { backgroundColor: "#FFC900" },
+  picktxt: { fontWeight: "800" },
   input: {
     borderWidth: 2,
     borderColor: "#000",
@@ -130,7 +143,7 @@ const s = StyleSheet.create({
   },
   half: { flex: 1 },
   list: { marginTop: 12 },
-  empty: { textAlign: "center", color: "#5A6B87", marginTop: 32 },
+  empty: { textAlign: "center", color: "#6F6455", marginTop: 32 },
   card: {
     backgroundColor: "#fff",
     borderWidth: 2,
@@ -144,6 +157,6 @@ const s = StyleSheet.create({
     elevation: 4,
   },
   route: { fontSize: 17, fontWeight: "800" },
-  meta: { fontSize: 13, color: "#5A6B87", marginTop: 2 },
+  meta: { fontSize: 13, color: "#6F6455", marginTop: 2 },
   fare: { fontSize: 18, fontWeight: "900", marginTop: 6 },
 });

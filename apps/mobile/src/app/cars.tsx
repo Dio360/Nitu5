@@ -92,7 +92,7 @@ export default function Cars(): React.JSX.Element {
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: "#FFF9EF" },
   content: { padding: 16, paddingBottom: 40 },
-  empty: { textAlign: "center", color: "#5A6B87", marginTop: 16 },
+  empty: { textAlign: "center", color: "#6F6455", marginTop: 16 },
   card: {
     backgroundColor: "#fff",
     borderWidth: 2,
@@ -106,7 +106,7 @@ const s = StyleSheet.create({
     elevation: 4,
   },
   title: { fontSize: 17, fontWeight: "800", marginBottom: 8 },
-  meta: { fontSize: 13, color: "#5A6B87", marginTop: 2 },
+  meta: { fontSize: 13, color: "#6F6455", marginTop: 2 },
   input: {
     borderWidth: 2,
     borderColor: "#000",
