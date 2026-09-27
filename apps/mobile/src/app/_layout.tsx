@@ -10,11 +10,8 @@ const Gate: React.FC = () => {
   useEffect(() => {
     if (loading) return;
     const top = segments[0];
-    const onLogin = top === "login";
-    if (!user && !onLogin) router.replace("/login");
-    else if (user && onLogin) {
-      router.replace(user.role === "RIDER" ? "/(rider)/index" : "/(driver)/index");
-    } else if (user && !top) {
+    if (!user && top !== "login") router.replace("/login");
+    else if (user && top === "login") {
       router.replace(user.role === "RIDER" ? "/(rider)/index" : "/(driver)/index");
     }
   }, [user, loading, segments]);
@@ -29,6 +26,7 @@ const Gate: React.FC = () => {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
       <Stack.Screen name="(rider)" />
       <Stack.Screen name="(driver)" />
       <Stack.Screen name="login" />
