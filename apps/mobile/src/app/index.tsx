@@ -42,10 +42,15 @@ export default function Search(): React.JSX.Element {
 
   return (
     <View style={s.wrap}>
-      <Text style={s.hello}>
-        Hello {user?.firstName} · <Text style={s.link} onPress={() => router.push("/bookings")}>my bookings</Text> ·{" "}
-        <Text style={s.link} onPress={logout}>log out</Text>
-      </Text>
+      <Text style={s.hello}>Hello {user?.firstName}</Text>
+      <View style={s.toprow}>
+        <TouchableOpacity style={s.topbtn} onPress={() => router.push("/bookings")}>
+          <Text style={s.topbtntxt}>My bookings</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[s.topbtn, s.topghost]} onPress={logout}>
+          <Text style={[s.topbtntxt, s.topghosttxt]}>Log out</Text>
+        </TouchableOpacity>
+      </View>
       <View style={s.row}>
         <TextInput style={[s.input, s.half]} placeholder="From" value={from} onChangeText={setFrom} />
         <TextInput style={[s.input, s.half]} placeholder="To" value={to} onChangeText={setTo} />
@@ -77,8 +82,18 @@ export default function Search(): React.JSX.Element {
 
 const s = StyleSheet.create({
   wrap: { flex: 1, padding: 16, backgroundColor: "#FFF9EF" },
-  hello: { fontSize: 15, fontWeight: "700", marginBottom: 12 },
-  link: { color: "#0D60D8" },
+  hello: { fontSize: 22, fontWeight: "900", marginBottom: 12 },
+  toprow: { flexDirection: "row", gap: 10, marginBottom: 14 },
+  topbtn: {
+    flex: 1,
+    backgroundColor: "#000",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  topghost: { backgroundColor: "#fff", borderWidth: 2, borderColor: "#000" },
+  topbtntxt: { color: "#fff", fontSize: 16, fontWeight: "800" },
+  topghosttxt: { color: "#000" },
   row: { flexDirection: "row", gap: 8 },
   input: {
     borderWidth: 2,
