@@ -59,10 +59,7 @@ export default function BookingDetails(): React.JSX.Element {
           {booking.seats} seat(s) · offered {naira(booking.offeredFareKobo)}
         </Text>
         {booking.agreedFareKobo != null ? (
-          <Text style={s.meta}>
-            Agreed {naira(booking.agreedFareKobo)} (fee {naira(booking.commissionKobo)}, driver{" "}
-            {naira(booking.driverEarningsKobo)})
-          </Text>
+          <Text style={s.meta}>Agreed price: {naira(booking.agreedFareKobo)}</Text>
         ) : null}
       </View>
       <View style={s.card}>
