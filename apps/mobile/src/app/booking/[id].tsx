@@ -63,7 +63,7 @@ export default function BookingDetails(): React.JSX.Element {
         ) : null}
       </View>
       <View style={s.card}>
-        <Text style={s.dname}>Haggle history</Text>
+        <Text style={s.dname}>Price history</Text>
         {steps.map((st) => (
           <Text key={st.id} style={s.meta}>
             {st.action} · {naira(st.amountKobo)} · {new Date(st.createdAt).toLocaleTimeString()}
