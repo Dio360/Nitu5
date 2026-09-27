@@ -12,7 +12,7 @@ const Gate: React.FC = () => {
     const top = segments[0];
     if (!user && top !== "login") router.replace("/login");
     else if (user && top === "login") {
-      router.replace(user.role === "RIDER" ? "/(rider)/index" : "/(driver)/index");
+      router.replace(user.role === "RIDER" ? "/(rider)" : "/(driver)");
     }
   }, [user, loading, segments]);
 

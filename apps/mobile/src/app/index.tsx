@@ -13,5 +13,5 @@ export default function FrontDoor(): React.JSX.Element {
       </View>
     );
   }
-  return <Redirect href={user.role === "RIDER" ? "/(rider)/index" : "/(driver)/index"} />;
+  return <Redirect href={user.role === "RIDER" ? "/(rider)" : "/(driver)"} />;
 }

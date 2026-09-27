@@ -7,11 +7,11 @@ import { Btn } from "@/components/Btn";
 export default function Services(): React.JSX.Element {
   return (
     <ScrollView style={s.wrap} contentContainerStyle={s.content}>
-      <TouchableOpacity style={s.card} onPress={() => router.push("/(rider)/index")}>
+      <TouchableOpacity style={s.card} onPress={() => router.push("/(rider)")}>
         <Text style={s.title}>🤝 Shared ride</Text>
         <Text style={s.meta}>Split seats and cost with people going your way.</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={s.card} onPress={() => router.push("/(rider)/index")}>
+      <TouchableOpacity style={s.card} onPress={() => router.push("/(rider)")}>
         <Text style={s.title}>🔒 Private ride</Text>
         <Text style={s.meta}>The whole car, just for you.</Text>
       </TouchableOpacity>
@@ -19,7 +19,7 @@ export default function Services(): React.JSX.Element {
         <Text style={s.title}>🧾 My trips</Text>
         <Text style={s.meta}>Offers, confirmed rides, price history.</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={s.card} onPress={() => router.push("/(driver)/index")}>
+      <TouchableOpacity style={s.card} onPress={() => router.push("/(driver)")}>
         <Text style={s.title}>💰 Drive & earn</Text>
         <Text style={s.meta}>Post trips, fill seats, get paid.</Text>
       </TouchableOpacity>
@@ -28,7 +28,7 @@ export default function Services(): React.JSX.Element {
         <Text style={s.meta}>Talk to support, report lost things.</Text>
       </TouchableOpacity>
       <View style={s.gap}>
-        <Btn title="Find a ride now" onPress={() => router.push("/(rider)/index")} />
+        <Btn title="Find a ride now" onPress={() => router.push("/(rider)")} />
       </View>
     </ScrollView>
   );
