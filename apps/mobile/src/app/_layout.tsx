@@ -33,6 +33,7 @@ const Gate: React.FC = () => {
       <Stack.Screen name="trip/[id]" options={{ headerShown: true, title: "Trip" }} />
       <Stack.Screen name="booking/[id]" options={{ headerShown: true, title: "Booking" }} />
       <Stack.Screen name="support" options={{ headerShown: true, title: "Help" }} />
+      <Stack.Screen name="+not-found" />
     </Stack>
   );
 };
