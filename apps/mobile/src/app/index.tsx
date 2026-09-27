@@ -18,14 +18,19 @@ export default function Search(): React.JSX.Element {
   const [to, setTo] = useState("");
   const [trips, setTrips] = useState<Trip[]>([]);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   const search = useCallback(async () => {
     setBusy(true);
+    setError("");
     try {
-      const q = new URLSearchParams();
-      if (from) q.set("from", from);
-      if (to) q.set("to", to);
-      setTrips(await api<Trip[]>(`/trips/search?${q.toString()}`));
+      const parts: string[] = [];
+      if (from.trim()) parts.push(`from=${encodeURIComponent(from.trim())}`);
+      if (to.trim()) parts.push(`to=${encodeURIComponent(to.trim())}`);
+      const qs = parts.length ? `?${parts.join("&")}` : "";
+      setTrips(await api<Trip[]>(`/trips/search${qs}`));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Search failed — check connection");
     } finally {
       setBusy(false);
     }
@@ -56,6 +61,12 @@ export default function Search(): React.JSX.Element {
         <TextInput style={[s.input, s.half]} placeholder="To" value={to} onChangeText={setTo} />
       </View>
       <Button title={busy ? "Searching…" : "Find rides"} onPress={search} disabled={busy} />
+      {error ? <Text style={s.error}>{error}</Text> : null}
+      {!busy && !error ? (
+        <Text style={s.count}>
+          {trips.length === 0 ? "No rides found — try different words." : `${trips.length} ride(s) found.`}
+        </Text>
+      ) : null}
       <FlatList
         data={trips}
         keyExtractor={(t) => t.id}
@@ -94,6 +105,8 @@ const s = StyleSheet.create({
   topghost: { backgroundColor: "#fff", borderWidth: 2, borderColor: "#000" },
   topbtntxt: { color: "#fff", fontSize: 16, fontWeight: "800" },
   topghosttxt: { color: "#000" },
+  error: { color: "#E02020", fontWeight: "700", marginTop: 8 },
+  count: { color: "#5A6B87", fontWeight: "700", marginTop: 8 },
   row: { flexDirection: "row", gap: 8 },
   input: {
     borderWidth: 2,
