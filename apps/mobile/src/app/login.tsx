@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import { api } from "@/api";
 import { useAuth } from "@/auth";
+import { Btn } from "@/components/Btn";
 
 export default function Login(): React.JSX.Element {
   const { login } = useAuth();
@@ -44,7 +45,7 @@ export default function Login(): React.JSX.Element {
         <>
           <Text style={s.label}>Phone number</Text>
           <TextInput style={s.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-          <Button title={busy ? "Sending…" : "Send code"} onPress={requestCode} disabled={busy} />
+          <Btn title={busy ? "Sending…" : "Send code"} onPress={requestCode} disabled={busy} />
         </>
       ) : (
         <>
@@ -56,7 +57,7 @@ export default function Login(): React.JSX.Element {
             keyboardType="number-pad"
             maxLength={6}
           />
-          <Button title={busy ? "Checking…" : "Log in"} onPress={confirmCode} disabled={busy} />
+          <Btn title={busy ? "Checking…" : "Log in"} onPress={confirmCode} disabled={busy} />
         </>
       )}
       {error ? <Text style={s.error}>{error}</Text> : null}

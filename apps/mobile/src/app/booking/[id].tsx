@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Button, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { api, naira } from "@/api";
+import { Btn } from "@/components/Btn";
 
 interface Step {
   id: string;
@@ -70,10 +71,10 @@ export default function BookingDetails(): React.JSX.Element {
           </Text>
         ))}
       </View>
-      {booking.status === "COUNTERED" ? <Button title="Accept counter" onPress={() => act("agree")} /> : null}
+      {booking.status === "COUNTERED" ? <Btn title="Accept counter" onPress={() => act("agree")} kind="pink" /> : null}
       {booking.status === "OFFERED" || booking.status === "COUNTERED" ? (
         <View style={s.gap}>
-          <Button title="Cancel offer" onPress={() => act("cancel")} color="#E02020" />
+          <Btn title="Cancel offer" onPress={() => act("cancel")} kind="danger" />
         </View>
       ) : null}
       {msg ? <Text style={s.msg}>{msg}</Text> : null}

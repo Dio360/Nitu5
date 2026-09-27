@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from "react";
-import { Button, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { api, naira } from "@/api";
+import { Btn } from "@/components/Btn";
 
 interface Booking {
   id: string;
@@ -50,7 +51,7 @@ export default function Bookings(): React.JSX.Element {
           </TouchableOpacity>
         )}
       />
-      <Button title="Refresh" onPress={load} disabled={busy} />
+      <Btn title="Refresh" onPress={load} disabled={busy} kind="ghost" />
     </View>
   );
 }

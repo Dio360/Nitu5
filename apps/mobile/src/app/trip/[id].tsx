@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Button, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Trip, api, naira } from "@/api";
+import { Btn } from "@/components/Btn";
 
 type Pay = "CASH" | "WALLET";
 
@@ -92,7 +93,7 @@ export default function TripDetails(): React.JSX.Element {
             </TouchableOpacity>
           ))}
         </View>
-        <Button title={busy ? "Sending…" : "Send offer"} onPress={offer} disabled={busy} />
+        <Btn title={busy ? "Sending…" : "Send offer"} onPress={offer} disabled={busy} kind="pink" />
         {msg ? <Text style={s.msg}>{msg}</Text> : null}
       </View>
     </ScrollView>

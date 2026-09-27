@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from "react";
 import {
-  Button,
   FlatList,
   StyleSheet,
   Text,
@@ -11,6 +10,7 @@ import {
 import { router, useFocusEffect } from "expo-router";
 import { Trip, api, naira } from "@/api";
 import { useAuth } from "@/auth";
+import { Btn } from "@/components/Btn";
 
 export default function Search(): React.JSX.Element {
   const { user, logout } = useAuth();
@@ -60,7 +60,7 @@ export default function Search(): React.JSX.Element {
         <TextInput style={[s.input, s.half]} placeholder="From" value={from} onChangeText={setFrom} />
         <TextInput style={[s.input, s.half]} placeholder="To" value={to} onChangeText={setTo} />
       </View>
-      <Button title={busy ? "Searching…" : "Find rides"} onPress={search} disabled={busy} />
+      <Btn title={busy ? "Searching…" : "Find rides"} onPress={search} disabled={busy} />
       {error ? <Text style={s.error}>{error}</Text> : null}
       {!busy && !error ? (
         <Text style={s.count}>
