@@ -17,7 +17,6 @@ export default function DriverTabs(): React.JSX.Element {
     >
       <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: icon("🏠") }} />
       <Tabs.Screen name="requests" options={{ title: "Requests", tabBarIcon: icon("📥") }} />
-      <Tabs.Screen name="trips" options={{ href: null }} />
       <Tabs.Screen name="cars" options={{ href: null }} />
       <Tabs.Screen name="post-trip" options={{ href: null }} />
       <Tabs.Screen name="trip/[id]" options={{ href: null }} />
