@@ -13,7 +13,7 @@ import { useAuth } from "@/auth";
 import { Btn } from "@/components/Btn";
 
 export default function Search(): React.JSX.Element {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -58,8 +58,11 @@ export default function Search(): React.JSX.Element {
         <TouchableOpacity style={s.topbtn} onPress={() => router.push("/bookings")}>
           <Text style={s.topbtntxt}>My bookings</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[s.topbtn, s.topghost]} onPress={logout}>
-          <Text style={[s.topbtntxt, s.topghosttxt]}>Log out</Text>
+        <TouchableOpacity style={[s.topbtn, s.topdrive]} onPress={() => router.push("/drive")}>
+          <Text style={s.topbtntxt}>Drive</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[s.topbtn, s.topghost]} onPress={() => router.push("/profile")}>
+          <Text style={[s.topbtntxt, s.topghosttxt]}>Me</Text>
         </TouchableOpacity>
       </View>
       <View style={s.row}>
@@ -112,6 +115,7 @@ const s = StyleSheet.create({
   topghost: { backgroundColor: "#fff", borderWidth: 2, borderColor: "#000" },
   topbtntxt: { color: "#fff", fontSize: 16, fontWeight: "800" },
   topghosttxt: { color: "#000" },
+  topdrive: { backgroundColor: "#0D60D8" },
   error: { color: "#E02020", fontWeight: "700", marginTop: 8 },
   count: { color: "#5A6B87", fontWeight: "700", marginTop: 8 },
   row: { flexDirection: "row", gap: 8 },

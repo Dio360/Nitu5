@@ -6,6 +6,7 @@ interface Auth {
   loading: boolean;
   login: (phone: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
+  reload: () => Promise<void>;
 }
 
 const AuthCtx = createContext<Auth>({
@@ -13,6 +14,7 @@ const AuthCtx = createContext<Auth>({
   loading: true,
   login: async () => {},
   logout: async () => {},
+  reload: async () => {},
 });
 
 export const useAuth = (): Auth => useContext(AuthCtx);
@@ -50,5 +52,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
-  return <AuthCtx.Provider value={{ user, loading, login, logout }}>{children}</AuthCtx.Provider>;
+  const reload = async (): Promise<void> => {
+    setUser(await api<User>("/me"));
+  };
+
+  return <AuthCtx.Provider value={{ user, loading, login, logout, reload }}>{children}</AuthCtx.Provider>;
 };

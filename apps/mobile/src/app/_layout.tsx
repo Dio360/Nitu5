@@ -29,6 +29,11 @@ const Gate: React.FC = () => {
       <Stack.Screen name="trip/[id]" options={{ title: "Trip" }} />
       <Stack.Screen name="bookings" options={{ title: "My bookings" }} />
       <Stack.Screen name="booking/[id]" options={{ title: "Booking" }} />
+      <Stack.Screen name="drive" options={{ title: "Drive & earn" }} />
+      <Stack.Screen name="cars" options={{ title: "My cars" }} />
+      <Stack.Screen name="post-trip" options={{ title: "Post a trip" }} />
+      <Stack.Screen name="drive-trip/[id]" options={{ title: "My trip" }} />
+      <Stack.Screen name="profile" options={{ title: "Profile" }} />
     </Stack>
   );
 };

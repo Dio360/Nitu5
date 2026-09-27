@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { api, naira } from "@/api";
 import { Btn } from "@/components/Btn";
@@ -19,6 +19,7 @@ interface Booking {
   agreedFareKobo: number | null;
   commissionKobo: number;
   driverEarningsKobo: number;
+  trip: { id: string };
 }
 
 export default function BookingDetails(): React.JSX.Element {
@@ -26,6 +27,7 @@ export default function BookingDetails(): React.JSX.Element {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
   const [msg, setMsg] = useState("");
+  const [code, setCode] = useState("");
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -47,6 +49,28 @@ export default function BookingDetails(): React.JSX.Element {
       await load();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Failed");
+    }
+  };
+
+  const checkin = async (): Promise<void> => {
+    setMsg("");
+    try {
+      await api(`/qr/verify`, { method: "POST", body: JSON.stringify({ code, bookingId: id }) });
+      setCode("");
+      await load();
+      setMsg("Checked in — have a safe trip.");
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Check-in failed");
+    }
+  };
+
+  const sos = async (): Promise<void> => {
+    setMsg("");
+    try {
+      await api(`/safety/sos`, { method: "POST", body: JSON.stringify({ tripId: booking?.trip.id }) });
+      setMsg("SOS sent — help is being alerted.");
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "SOS failed");
     }
   };
 
@@ -72,6 +96,18 @@ export default function BookingDetails(): React.JSX.Element {
         ))}
       </View>
       {booking.status === "COUNTERED" ? <Btn title="Accept counter" onPress={() => act("agree")} kind="pink" /> : null}
+      {booking.status === "CONFIRMED" ? (
+        <View style={s.card}>
+          <Text style={s.dname}>Check in with driver's code</Text>
+          <TextInput style={s.input} placeholder="e.g. N5-a1b2c3d4" value={code} onChangeText={setCode} autoCapitalize="none" />
+          <Btn title="Check in" onPress={checkin} kind="dark" />
+        </View>
+      ) : null}
+      {booking.status === "CONFIRMED" || booking.status === "QR_VERIFIED" || booking.status === "IN_PROGRESS" ? (
+        <View style={s.card}>
+          <Btn title="SOS — I need help" onPress={sos} kind="danger" />
+        </View>
+      ) : null}
       {booking.status === "OFFERED" || booking.status === "COUNTERED" ? (
         <View style={s.gap}>
           <Btn title="Cancel offer" onPress={() => act("cancel")} kind="danger" />
@@ -101,6 +137,15 @@ const s = StyleSheet.create({
   status: { fontSize: 20, fontWeight: "900" },
   meta: { fontSize: 14, color: "#333", marginTop: 4 },
   dname: { fontSize: 17, fontWeight: "800", marginBottom: 6 },
+  input: {
+    borderWidth: 2,
+    borderColor: "#000",
+    borderRadius: 12,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: "#fff",
+    marginBottom: 10,
+  },
   gap: { marginTop: 10 },
   msg: { marginTop: 10, fontWeight: "700", color: "#E02020" },
 });

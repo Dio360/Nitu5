@@ -187,7 +187,7 @@ export class BookingsService {
     return this.db.booking.findMany({
       where: { riderId },
       orderBy: { createdAt: "desc" },
-      include: { trip: { select: { originLabel: true, destinationLabel: true, departureAt: true } } },
+      include: { trip: { select: { id: true, originLabel: true, destinationLabel: true, departureAt: true } } },
     });
   }
 
