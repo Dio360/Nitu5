@@ -191,6 +191,19 @@ export class BookingsService {
     });
   }
 
+  /** Every offer on all my trips — the driver requests inbox. */
+  driverOffers(driverId: string) {
+    return this.db.booking.findMany({
+      where: { trip: { driverId } },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      include: {
+        trip: { select: { id: true, originLabel: true, destinationLabel: true, departureAt: true, status: true } },
+        rider: { select: { firstName: true, lastName: true, rating: true, verificationTier: true } },
+      },
+    });
+  }
+
   tripOffers(driverId: string, tripId: string) {
     return this.db.booking
       .findMany({

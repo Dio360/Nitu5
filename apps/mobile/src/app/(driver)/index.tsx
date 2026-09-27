@@ -1,23 +1,39 @@
 import React, { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { api, naira } from "@/api";
+import { useAuth } from "@/auth";
+import { Btn } from "@/components/Btn";
 
-/** Driver home: money first, then trips and cars. */
+interface MyTrip {
+  id: string;
+  originLabel: string;
+  destinationLabel: string;
+  departureAt: string;
+  status: string;
+  seatsTotal: number;
+  seatsBooked: number;
+}
+
+/** Driver home: money first, then today's work. */
 export default function DriverHome(): React.JSX.Element {
-  const [earn, setEarn] = useState<{ driving: { trips: number; netKobo: number } } | null>(null);
-  const [wallet, setWallet] = useState<number | null>(null);
+  const { user } = useAuth();
+  const [trips, setTrips] = useState<MyTrip[]>([]);
+  const [net, setNet] = useState<number | null>(null);
+  const [count, setCount] = useState<number | null>(null);
+  const isDriver = user?.role === "PRIVATE_DRIVER" || user?.role === "PROFESSIONAL_DRIVER";
 
   const load = useCallback(async () => {
+    if (!isDriver) return;
+    setTrips(await api<MyTrip[]>("/trips/mine"));
     try {
       const e = await api<{ driving: { trips: number; netKobo: number } }>("/earnings/me");
-      setEarn(e);
-      const w = await api<{ balanceKobo: number }>("/wallet/mine");
-      setWallet(w.balanceKobo);
+      setNet(e.driving.netKobo);
+      setCount(e.driving.trips);
     } catch {
-      setEarn(null);
+      setNet(null);
     }
-  }, []);
+  }, [isDriver]);
 
   useFocusEffect(
     useCallback(() => {
@@ -25,33 +41,65 @@ export default function DriverHome(): React.JSX.Element {
     }, [load]),
   );
 
-  return (
-    <ScrollView style={s.wrap} contentContainerStyle={s.content}>
-      <View style={s.card}>
-        <Text style={s.big}>{earn == null ? "…" : naira(earn.driving.netKobo)}</Text>
-        <Text style={s.meta}>Earned driving · {earn?.driving.trips ?? "…"} trips · Wallet {wallet == null ? "…" : naira(wallet)}</Text>
+  if (!isDriver) {
+    return (
+      <View style={s.wrap}>
+        <View style={s.card}>
+          <Text style={s.title}>You are riding.</Text>
+          <Text style={s.meta}>Switch to a driver account in your profile to earn.</Text>
+        </View>
+        <Btn title="Open my profile" onPress={() => router.push("/(driver)/account")} kind="dark" />
       </View>
-      <TouchableOpacity style={s.card} onPress={() => router.push("/(driver)/trips")}>
-        <Text style={s.title}>🚗 My trips</Text>
-        <Text style={s.meta}>Post trips, see offers, run trip day.</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={s.card} onPress={() => router.push("/(driver)/cars")}>
-        <Text style={s.title}>🔧 My cars</Text>
-        <Text style={s.meta}>Add and manage your vehicles.</Text>
-      </TouchableOpacity>
-    </ScrollView>
+    );
+  }
+
+  return (
+    <FlatList
+      style={s.wrap}
+      contentContainerStyle={s.content}
+      data={trips}
+      keyExtractor={(t) => t.id}
+      ListHeaderComponent={
+        <>
+          <View style={s.card}>
+            <Text style={s.big}>{net == null ? "…" : naira(net)}</Text>
+            <Text style={s.meta}>Earned driving · {count ?? "…"} trips</Text>
+          </View>
+          <Btn title="📥 Requests" onPress={() => router.push("/(driver)/requests")} kind="pink" />
+          <Btn title="+ Post a trip" onPress={() => router.push("/(driver)/post-trip")} />
+          <Btn title="My cars" onPress={() => router.push("/(driver)/cars")} kind="ghost" />
+          <Text style={s.dname}>My trips</Text>
+        </>
+      }
+      ListEmptyComponent={<Text style={s.empty}>No trips yet — post your first one.</Text>}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={s.card}
+          onPress={() => router.push({ pathname: "/(driver)/trip/[id]", params: { id: item.id } })}
+        >
+          <Text style={s.route}>
+            {item.originLabel} → {item.destinationLabel}
+          </Text>
+          <Text style={s.meta}>
+            {new Date(item.departureAt).toLocaleString()} · {item.seatsBooked}/{item.seatsTotal} taken
+          </Text>
+          <Text style={s.status}>{item.status}</Text>
+        </TouchableOpacity>
+      )}
+    />
   );
 }
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: "#FFF9EF" },
   content: { padding: 16, paddingBottom: 40 },
+  empty: { textAlign: "center", color: "#6F6455", marginTop: 16 },
   card: {
     backgroundColor: "#fff",
     borderWidth: 2,
     borderColor: "#000",
     borderRadius: 16,
-    padding: 16,
+    padding: 14,
     marginBottom: 12,
     shadowColor: "#000",
     shadowOffset: { width: 4, height: 4 },
@@ -60,5 +108,8 @@ const s = StyleSheet.create({
   },
   big: { fontSize: 34, fontWeight: "900" },
   title: { fontSize: 19, fontWeight: "900" },
-  meta: { fontSize: 13, color: "#6F6455", marginTop: 4 },
+  route: { fontSize: 17, fontWeight: "800" },
+  meta: { fontSize: 13, color: "#6F6455", marginTop: 2 },
+  status: { fontSize: 15, fontWeight: "900", marginTop: 6 },
+  dname: { fontSize: 17, fontWeight: "800", marginVertical: 8 },
 });

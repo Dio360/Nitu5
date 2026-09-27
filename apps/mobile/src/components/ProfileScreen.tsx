@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { useFocusEffect } from "expo-router";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
 import { User, api, naira } from "@/api";
 import { useAuth } from "@/auth";
 import { Btn } from "@/components/Btn";
@@ -127,6 +127,12 @@ export default function Profile(): React.JSX.Element {
       </View>
 
       {msg ? <Text style={s.msg}>{msg}</Text> : null}
+      <TouchableOpacity style={s.row} onPress={() => router.push("/(rider)/services")}>
+        <Text style={s.rowtxt}>🧰 More services ›</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={s.row} onPress={() => router.push("/support")}>
+        <Text style={s.rowtxt}>🆘 Help & lost items ›</Text>
+      </TouchableOpacity>
       <Btn title="Log out" onPress={logout} kind="danger" />
     </ScrollView>
   );
@@ -160,4 +166,13 @@ const s = StyleSheet.create({
     marginBottom: 10,
   },
   msg: { fontWeight: "700", color: "#E02020", textAlign: "center", marginBottom: 8 },
+  row: {
+    backgroundColor: "#fff",
+    borderWidth: 2,
+    borderColor: "#000",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+  },
+  rowtxt: { fontSize: 16, fontWeight: "800" },
 });

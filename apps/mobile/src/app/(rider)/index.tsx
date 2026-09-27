@@ -12,138 +12,217 @@ import { Trip, api, naira } from "@/api";
 import { useAuth } from "@/auth";
 import { Btn } from "@/components/Btn";
 
-export default function Search(): React.JSX.Element {
+type When = "NOW" | "SCHEDULE";
+type Ride = "SHARED" | "PRIVATE";
+
+interface Recent {
+  trip: { destinationLabel: string };
+}
+
+export default function Home(): React.JSX.Element {
   const { user } = useAuth();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [ride, setRide] = useState<"ALL" | "SHARED" | "PRIVATE">("ALL");
+  const [when, setWhen] = useState<When>("NOW");
+  const [date, setDate] = useState("");
+  const [ride, setRide] = useState<Ride>("SHARED");
   const [trips, setTrips] = useState<Trip[]>([]);
+  const [recents, setRecents] = useState<string[]>([]);
+  const [wallet, setWallet] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [searched, setSearched] = useState(false);
 
-  const search = useCallback(async () => {
+  const loadMeta = useCallback(async () => {
+    try {
+      const mine = await api<Array<Recent & { id: string }>>("/bookings/mine");
+      const seen: string[] = [];
+      for (const b of mine) {
+        const d = b.trip.destinationLabel;
+        if (d && !seen.includes(d) && seen.length < 3) seen.push(d);
+      }
+      setRecents(seen);
+    } catch {
+      setRecents([]);
+    }
+    try {
+      const w = await api<{ balanceKobo: number }>("/wallet/mine");
+      setWallet(w.balanceKobo);
+    } catch {
+      setWallet(null);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadMeta();
+    }, [loadMeta]),
+  );
+
+  const search = async (): Promise<void> => {
     setBusy(true);
     setError("");
+    setSearched(true);
     try {
       const parts: string[] = [];
       if (from.trim()) parts.push(`from=${encodeURIComponent(from.trim())}`);
       if (to.trim()) parts.push(`to=${encodeURIComponent(to.trim())}`);
-      if (ride !== "ALL") parts.push(`rideModel=${ride}`);
-      const qs = parts.length ? `?${parts.join("&")}` : "";
-      setTrips(await api<Trip[]>(`/trips/search${qs}`));
+      parts.push(`rideModel=${ride}`);
+      if (when === "SCHEDULE" && date.trim()) parts.push(`date=${date.trim()}`);
+      setTrips(await api<Trip[]>(`/trips/search?${parts.join("&")}`));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Search failed — check connection");
     } finally {
       setBusy(false);
     }
-  }, [from, to, ride]);
-
-  useFocusEffect(
-    useCallback(() => {
-      search();
-    }, [search]),
-  );
+  };
 
   const fare = (t: Trip): string =>
-    t.rideModel === "SHARED" ? `${naira(t.farePerSeatKobo)} / seat` : `${naira(t.privateFareKobo)} / car`;
-
-  const hour = new Date().getHours();
-  const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+    t.rideModel === "SHARED" ? `${naira(t.farePerSeatKobo)} / seat` : `${naira(t.privateFareKobo)} / ride`;
 
   return (
-    <View style={s.wrap}>
-      <Text style={s.hello}>
-        {greet}, {user?.firstName}
-      </Text>
-      <Text style={s.sub}>Where to today?</Text>
-      <View style={s.toprow}>
-        <TouchableOpacity style={s.topbtn} onPress={() => router.push("/(rider)/activity")}>
-          <Text style={s.topbtntxt}>My bookings</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[s.topbtn, s.topdrive]} onPress={() => router.push("/(driver)/trips")}>
-          <Text style={[s.topbtntxt, s.topdrivetxt]}>Drive</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[s.topbtn, s.topghost]} onPress={() => router.push("/(rider)/account")}>
-          <Text style={[s.topbtntxt, s.topghosttxt]}>Me</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={s.row}>
-        <TextInput style={[s.input, s.half]} placeholder="From" value={from} onChangeText={setFrom} />
-        <TextInput style={[s.input, s.half]} placeholder="To" value={to} onChangeText={setTo} />
-      </View>
-      <View style={s.row}>
-        {(["ALL", "SHARED", "PRIVATE"] as const).map((r) => (
-          <TouchableOpacity key={r} style={[s.pick, ride === r && s.pickOn]} onPress={() => setRide(r)}>
-            <Text style={s.picktxt}>{r === "ALL" ? "All" : r === "SHARED" ? "Shared" : "Private"}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <Btn title={busy ? "Searching…" : "Find rides"} onPress={search} disabled={busy} />
-      {error ? <Text style={s.error}>{error}</Text> : null}
-      {!busy && !error ? (
-        <Text style={s.count}>
-          {trips.length === 0 ? "No rides found — try different words." : `${trips.length} ride(s) found.`}
-        </Text>
-      ) : null}
-      <FlatList
-        data={trips}
-        keyExtractor={(t) => t.id}
-        style={s.list}
-        ListEmptyComponent={!busy ? <Text style={s.empty}>No rides yet — try clearing the boxes.</Text> : null}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={s.card} onPress={() => router.push({ pathname: "/trip/[id]", params: { id: item.id } })}>
-            <Text style={s.route}>
-              {item.originLabel} → {item.destinationLabel}
+    <FlatList
+      style={s.wrap}
+      contentContainerStyle={s.content}
+      data={trips}
+      keyExtractor={(t) => t.id}
+      ListHeaderComponent={
+        <>
+          <Text style={s.hello}>
+            {greet()}, {user?.firstName}
+          </Text>
+          <View style={s.where}>
+            <Text style={s.wheretitle}>Where to?</Text>
+            <TextInput style={s.input} placeholder="📍 From" value={from} onChangeText={setFrom} />
+            <TextInput style={s.input} placeholder="🏁 To" value={to} onChangeText={setTo} />
+            <View style={s.row}>
+              {(["NOW", "SCHEDULE"] as When[]).map((w) => (
+                <TouchableOpacity key={w} style={[s.pick, when === w && s.pickOn]} onPress={() => setWhen(w)}>
+                  <Text style={s.picktxt}>{w === "NOW" ? "⚡ Now" : "📅 Schedule"}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {when === "SCHEDULE" ? (
+              <TextInput style={s.input} placeholder="Date YYYY-MM-DD" value={date} onChangeText={setDate} />
+            ) : null}
+          </View>
+          <View style={s.row}>
+            {(["SHARED", "PRIVATE"] as Ride[]).map((r) => (
+              <TouchableOpacity key={r} style={[s.cat, ride === r && s.catOn]} onPress={() => setRide(r)}>
+                <Text style={s.catemoji}>{r === "SHARED" ? "🤝" : "🔒"}</Text>
+                <Text style={s.cattxt}>{r === "SHARED" ? "Shared" : "Private"}</Text>
+                <Text style={s.catsub}>{r === "SHARED" ? "Cheapest" : "Whole car"}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <View style={s.payrow}>
+            <Text style={s.paytxt}>💵 {wallet == null ? "Wallet…" : naira(wallet)}</Text>
+            <Text style={s.paylink} onPress={() => router.push("/(rider)/account")}>
+              Top up ›
             </Text>
-            <Text style={s.meta}>
-              {new Date(item.departureAt).toLocaleString()} · {item.seatsLeft} seats left
+          </View>
+          <Btn title={busy ? "Finding…" : "See prices"} onPress={search} disabled={busy} />
+          {error ? <Text style={s.error}>{error}</Text> : null}
+          {recents.length > 0 && !searched ? (
+            <View style={s.recent}>
+              <Text style={s.dname}>Recent</Text>
+              {recents.map((r) => (
+                <TouchableOpacity
+                  key={r}
+                  onPress={() => {
+                    setTo(r);
+                  }}
+                >
+                  <Text style={s.recentitem}>🕑 {r}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : null}
+          {searched && !busy && !error ? (
+            <Text style={s.count}>
+              {trips.length === 0 ? "No rides — try other words or day." : `${trips.length} option(s). Prices upfront, no surprises.`}
             </Text>
-            <Text style={s.meta}>
-              {item.driver.firstName} ⭐ {item.driver.rating ?? "new"} · {item.driver.verificationTier}
-            </Text>
-            <Text style={s.fare}>{fare(item)}</Text>
-          </TouchableOpacity>
-        )}
-      />
-    </View>
+          ) : null}
+        </>
+      }
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={s.card}
+          onPress={() => router.push({ pathname: "/trip/[id]", params: { id: item.id } })}
+        >
+          <Text style={s.route}>
+            {item.originLabel} → {item.destinationLabel}
+          </Text>
+          <Text style={s.meta}>
+            🕑 {new Date(item.departureAt).toLocaleString()} · 💺 {item.seatsLeft} left
+          </Text>
+          <Text style={s.meta}>
+            {item.driver.firstName} ⭐ {item.driver.rating ?? "new"} · {item.driver.verificationTier}
+          </Text>
+          <Text style={s.fare}>{fare(item)}</Text>
+        </TouchableOpacity>
+      )}
+    />
   );
 }
 
+const greet = (): string => {
+  const h = new Date().getHours();
+  return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+};
+
 const s = StyleSheet.create({
-  wrap: { flex: 1, padding: 16, backgroundColor: "#FFF9EF" },
-  hello: { fontSize: 24, fontWeight: "900" },
-  sub: { fontSize: 15, color: "#6F6455", marginBottom: 12 },
-  toprow: { flexDirection: "row", gap: 10, marginBottom: 14 },
-  topbtn: {
-    flex: 1,
-    backgroundColor: "#000",
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
+  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  content: { padding: 16, paddingBottom: 40 },
+  hello: { fontSize: 24, fontWeight: "900", marginBottom: 12 },
+  where: {
+    backgroundColor: "#fff",
+    borderWidth: 2,
+    borderColor: "#000",
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    elevation: 4,
   },
-  topghost: { backgroundColor: "#fff", borderWidth: 2, borderColor: "#000" },
-  topbtntxt: { color: "#fff", fontSize: 16, fontWeight: "800" },
-  topghosttxt: { color: "#000" },
-  topdrive: { backgroundColor: "#FFC900" },
-  topdrivetxt: { color: "#000" },
-  error: { color: "#E02020", fontWeight: "700", marginTop: 8 },
-  count: { color: "#6F6455", fontWeight: "700", marginTop: 8 },
-  row: { flexDirection: "row", gap: 8 },
-  pick: { flex: 1, borderWidth: 2, borderColor: "#000", borderRadius: 12, padding: 10, alignItems: "center", marginBottom: 12 },
-  pickOn: { backgroundColor: "#FFC900" },
-  picktxt: { fontWeight: "800" },
+  wheretitle: { fontSize: 20, fontWeight: "900", marginBottom: 10 },
   input: {
     borderWidth: 2,
     borderColor: "#000",
     borderRadius: 12,
     padding: 10,
     fontSize: 16,
+    backgroundColor: "#FFF9EF",
+    marginBottom: 10,
+  },
+  row: { flexDirection: "row", gap: 8 },
+  pick: { flex: 1, borderWidth: 2, borderColor: "#000", borderRadius: 12, padding: 10, alignItems: "center", marginBottom: 4 },
+  pickOn: { backgroundColor: "#FFC900" },
+  picktxt: { fontWeight: "800" },
+  cat: {
+    flex: 1,
     backgroundColor: "#fff",
+    borderWidth: 2,
+    borderColor: "#000",
+    borderRadius: 16,
+    padding: 12,
+    alignItems: "center",
     marginBottom: 12,
   },
-  half: { flex: 1 },
-  list: { marginTop: 12 },
-  empty: { textAlign: "center", color: "#6F6455", marginTop: 32 },
+  catOn: { backgroundColor: "#FF90E8" },
+  catemoji: { fontSize: 26 },
+  cattxt: { fontWeight: "900", fontSize: 16, marginTop: 4 },
+  catsub: { fontSize: 12, color: "#6F6455", fontWeight: "700" },
+  payrow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  paytxt: { fontWeight: "800", fontSize: 15 },
+  paylink: { fontWeight: "800", fontSize: 15 },
+  recent: { marginBottom: 8 },
+  recentitem: { fontSize: 16, fontWeight: "700", paddingVertical: 8 },
+  dname: { fontSize: 17, fontWeight: "800", marginBottom: 4 },
+  count: { color: "#6F6455", fontWeight: "700", marginBottom: 8 },
+  error: { color: "#E02020", fontWeight: "700", marginBottom: 8 },
   card: {
     backgroundColor: "#fff",
     borderWidth: 2,

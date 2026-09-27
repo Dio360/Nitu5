@@ -19,7 +19,7 @@ export default function Services(): React.JSX.Element {
         <Text style={s.title}>🧾 My trips</Text>
         <Text style={s.meta}>Offers, confirmed rides, price history.</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={s.card} onPress={() => router.push("/(driver)/trips")}>
+      <TouchableOpacity style={s.card} onPress={() => router.push("/(driver)/index")}>
         <Text style={s.title}>💰 Drive & earn</Text>
         <Text style={s.meta}>Post trips, fill seats, get paid.</Text>
       </TouchableOpacity>

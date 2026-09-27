@@ -20,6 +20,11 @@ export class BookingsController {
     return this.bookings.riderBookings(me.userId);
   }
 
+  @Get("offers/mine")
+  offersMine(@CurrentUser() me: AuthUser) {
+    return this.bookings.driverOffers(me.userId);
+  }
+
   /** Driver accepts the rider's offer — seats reserved. */
   @Post(":id/accept")
   accept(@CurrentUser() me: AuthUser, @Param("id") id: string) {

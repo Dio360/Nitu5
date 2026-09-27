@@ -4,7 +4,7 @@ import { Tabs } from "expo-router";
 
 const icon = (emoji: string) => (): React.JSX.Element => <Text style={{ fontSize: 22 }}>{emoji}</Text>;
 
-/** Driver world: Home · Trips · Account. */
+/** Driver world: Home · Requests · Account. */
 export default function DriverTabs(): React.JSX.Element {
   return (
     <Tabs
@@ -16,7 +16,11 @@ export default function DriverTabs(): React.JSX.Element {
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: icon("🏠") }} />
-      <Tabs.Screen name="trips" options={{ title: "Trips", tabBarIcon: icon("🚗") }} />
+      <Tabs.Screen name="requests" options={{ title: "Requests", tabBarIcon: icon("📥") }} />
+      <Tabs.Screen name="trips" options={{ href: null }} />
+      <Tabs.Screen name="cars" options={{ href: null }} />
+      <Tabs.Screen name="post-trip" options={{ href: null }} />
+      <Tabs.Screen name="trip/[id]" options={{ href: null }} />
       <Tabs.Screen name="account" options={{ title: "Account", tabBarIcon: icon("👤") }} />
     </Tabs>
   );
