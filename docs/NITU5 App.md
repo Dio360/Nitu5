@@ -1652,3 +1652,34 @@ If a vehicle is already travelling from Lekki to Ikeja with three empty seats, N
 
 That is the core idea that should distinguish Nitu5 from conventional ride-hailing.
 
+---
+
+# **Appendix A — Implementation Plan Review (Build Note, Sep 2026)**
+
+**Framework:** TypeScript everywhere — NestJS backend (`apps/api`), Expo React Native phone app (`apps/mobile`), Next.js admin website (`apps/admin`), one shared workspace.
+
+**Database:** PostgreSQL 16 + PostGIS (trips need map points; money needs strict tables). Small fast store: Redis (seat holds, codes). Background jobs: BullMQ worker.
+
+**Authentication:** Phone-number login codes (mock sender prints to console in dev; real SMS later). Short-life access pass (15 min) + long-life refresh pass (30 days). Roles: rider, private driver, professional driver, staff. Four trust levels L1–L4 plus car checks.
+
+**File storage:** Any S3-style store. Free local mock (S3Mock) now; Cloudflare R2 later — same language, one setting changes.
+
+**Where it runs (for now):** **Everything on one local PC — the app AND the database.** Docker boxes for Postgres, Redis, file mock, mail catcher; backend on port 3000, admin site on 3001, phone app via Expo Go on the same WiFi. No cloud, no paid services yet.
+
+**Why these decisions:**
+- One language everywhere = one person can fix anything, shared money/seat rules can't drift apart.
+- Postgres + PostGIS = map search and money records stay correct (no loose data).
+- Phone codes = Nigeria is phone-first; no passwords to forget or leak.
+- S3-style files = private photo links, easy move to real cloud later.
+- Local PC first = ₦0 cost while learning and testing; cloud only when real users arrive.
+
+# **Appendix B — Design Preview Note (design.html, Sep 2026)**
+
+**File:** `design.html` (repo root) — one page showing colors (Bolt green `#34BB78`, ink, warm grey, highlight yellow, danger red), typography scale (hero/title/body/meta/fare), five styled buttons, three sample inputs, one trip card. Open by double-clicking.
+
+**Refinement requested and applied (one specific change): clearer inputs.**
+Before: thin 1px grey border, no visible sign of where you type.
+After: roomier boxes (13px padding, 16px text) and a visible focus state — border turns Bolt green (2px) with a soft green glow. Click any box in `design.html` to see it. Verified in the file before saving.
+
+**Earlier style history (for the record):** started Trust-green, tried Uber/Bolt-simple and youthful QR, then Gumroad chunk, then settled on Bolt-style clean (green + warm greys) with plain words everywhere (no underscores on screen).
+
