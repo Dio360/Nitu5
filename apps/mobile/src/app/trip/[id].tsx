@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Button, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Button, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Trip, api, naira } from "@/api";
 
@@ -48,7 +48,7 @@ export default function TripDetails(): React.JSX.Element {
   if (!trip) return <ActivityIndicator style={s.spin} size="large" />;
 
   return (
-    <View style={s.wrap}>
+    <ScrollView style={s.wrap} contentContainerStyle={s.content}>
       <View style={s.card}>
         <Text style={s.route}>
           {trip.originLabel} → {trip.destinationLabel}
@@ -95,12 +95,13 @@ export default function TripDetails(): React.JSX.Element {
         <Button title={busy ? "Sending…" : "Send offer"} onPress={offer} disabled={busy} />
         {msg ? <Text style={s.msg}>{msg}</Text> : null}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, padding: 16, backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  content: { padding: 16, paddingBottom: 40 },
   spin: { flex: 1 },
   card: {
     backgroundColor: "#fff",

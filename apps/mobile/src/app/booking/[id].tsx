@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Button, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Button, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { api, naira } from "@/api";
 
@@ -52,7 +52,7 @@ export default function BookingDetails(): React.JSX.Element {
   if (!booking) return <ActivityIndicator style={s.spin} size="large" />;
 
   return (
-    <View style={s.wrap}>
+    <ScrollView style={s.wrap} contentContainerStyle={s.content}>
       <View style={s.card}>
         <Text style={s.status}>{booking.status}</Text>
         <Text style={s.meta}>
@@ -80,12 +80,13 @@ export default function BookingDetails(): React.JSX.Element {
         </View>
       ) : null}
       {msg ? <Text style={s.msg}>{msg}</Text> : null}
-    </View>
+    </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, padding: 16, backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  content: { padding: 16, paddingBottom: 40 },
   spin: { flex: 1 },
   card: {
     backgroundColor: "#fff",
