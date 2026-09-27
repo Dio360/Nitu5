@@ -57,12 +57,21 @@ Nitu5/
 
 ## 🎯 Target MVP Roadmap
 
-* [x] **Product Requirements Definition (PRD v1.0)**
-* [ ] Rider & Driver Authentication + Tiered Verification
-* [ ] Journey Publishing & Shared-Route Matching Engine
-* [ ] Fare Negotiation & Seat Reservation System
-* [ ] QR Verification & Active Trip Safety Engine
-* [ ] Multi-channel Payment Gateway & Driver Wallet
+* [x] **Product Requirements Definition (PRD v1.0)** — see [PRD.md](./PRD.md) (includes Appendix A: stack review, Appendix B: design note)
+* [x] Rider & Driver Authentication + Tiered Verification
+* [x] Journey Publishing & Shared-Route Matching Engine
+* [x] Fare Negotiation & Seat Reservation System
+* [x] QR Verification & Active Trip Safety Engine
+* [x] Multi-channel Payment Gateway & Driver Wallet
+* [x] Phone app (Expo: rider + driver worlds) & Admin website
+* [ ] Real SMS + Paystack + live maps + test-flight builds
+
+## 🖥️ Demo & Progress
+
+* **Design preview (live):** https://htmlpreview.github.io/?https://github.com/Dio360/Nitu5/blob/main/design.html
+* **PRD (live):** https://github.com/Dio360/Nitu5/blob/main/PRD.md
+* **Progress:** backend Tier 1 complete and tested end-to-end (auth → trips → haggle → QR → ride → pay → rate → disputes → alerts); phone app through driver/rider worlds; admin dashboard live. Runs locally via `docker compose up` + `npm run dev` (see `docs/IMPLEMENTATION_PLAN.md`). Next: real providers, maps, builds.
+* **Note:** the full app runs on a local PC by design (zero-cost phase) — clone the repo and follow `docs/IMPLEMENTATION_PLAN.md` §4 to run it.
 
 ---
 
