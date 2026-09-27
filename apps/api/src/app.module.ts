@@ -24,6 +24,7 @@ import { NotifyService } from "./notify/notify.service";
 import { NotificationsController } from "./notify/notifications.controller";
 import { DisputesController } from "./disputes/disputes.controller";
 import { SupportController } from "./support/support.controller";
+import { AdminController } from "./admin/admin.controller";
 import { VerificationController } from "./verification/verification.controller";
 
 @Module({
@@ -51,6 +52,7 @@ import { VerificationController } from "./verification/verification.controller";
     NotificationsController,
     DisputesController,
     SupportController,
+    AdminController,
   ],
   providers: [PrismaService, OtpService, AuthService, S3Service, GeocodeService, BookingsService, QrService, NotifyService],
 })
