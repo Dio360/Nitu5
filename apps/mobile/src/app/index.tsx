@@ -45,9 +45,15 @@ export default function Search(): React.JSX.Element {
   const fare = (t: Trip): string =>
     t.rideModel === "SHARED" ? `${naira(t.farePerSeatKobo)} / seat` : `${naira(t.privateFareKobo)} / car`;
 
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
   return (
     <View style={s.wrap}>
-      <Text style={s.hello}>Hello {user?.firstName}</Text>
+      <Text style={s.hello}>
+        {greet}, {user?.firstName}
+      </Text>
+      <Text style={s.sub}>Where to today?</Text>
       <View style={s.toprow}>
         <TouchableOpacity style={s.topbtn} onPress={() => router.push("/bookings")}>
           <Text style={s.topbtntxt}>My bookings</Text>
@@ -93,7 +99,8 @@ export default function Search(): React.JSX.Element {
 
 const s = StyleSheet.create({
   wrap: { flex: 1, padding: 16, backgroundColor: "#FFF9EF" },
-  hello: { fontSize: 22, fontWeight: "900", marginBottom: 12 },
+  hello: { fontSize: 24, fontWeight: "900" },
+  sub: { fontSize: 15, color: "#5A6B87", marginBottom: 12 },
   toprow: { flexDirection: "row", gap: 10, marginBottom: 14 },
   topbtn: {
     flex: 1,
