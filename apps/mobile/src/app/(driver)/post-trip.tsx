@@ -35,7 +35,7 @@ export default function PostTrip(): React.JSX.Element {
             : { privateFareKobo: Math.round(Number(fare) * 100) }),
         }),
       });
-      router.replace({ pathname: "/drive-trip/[id]", params: { id: res.id } });
+      router.replace({ pathname: "/(driver)/trip/[id]", params: { id: res.id } });
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Could not post trip");
     } finally {

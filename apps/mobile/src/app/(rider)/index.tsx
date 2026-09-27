@@ -57,13 +57,13 @@ export default function Search(): React.JSX.Element {
       </Text>
       <Text style={s.sub}>Where to today?</Text>
       <View style={s.toprow}>
-        <TouchableOpacity style={s.topbtn} onPress={() => router.push("/bookings")}>
+        <TouchableOpacity style={s.topbtn} onPress={() => router.push("/(rider)/activity")}>
           <Text style={s.topbtntxt}>My bookings</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[s.topbtn, s.topdrive]} onPress={() => router.push("/drive")}>
+        <TouchableOpacity style={[s.topbtn, s.topdrive]} onPress={() => router.push("/(driver)/trips")}>
           <Text style={[s.topbtntxt, s.topdrivetxt]}>Drive</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[s.topbtn, s.topghost]} onPress={() => router.push("/profile")}>
+        <TouchableOpacity style={[s.topbtn, s.topghost]} onPress={() => router.push("/(rider)/account")}>
           <Text style={[s.topbtntxt, s.topghosttxt]}>Me</Text>
         </TouchableOpacity>
       </View>

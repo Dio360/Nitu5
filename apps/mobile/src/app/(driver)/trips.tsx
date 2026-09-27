@@ -37,15 +37,15 @@ export default function Drive(): React.JSX.Element {
           <Text style={s.title}>You are riding.</Text>
           <Text style={s.meta}>Switch to a driver account in your profile to post trips and earn.</Text>
         </View>
-        <Btn title="Open my profile" onPress={() => router.push("/profile")} kind="dark" />
+        <Btn title="Open my profile" onPress={() => router.push("/(driver)/account")} kind="dark" />
       </View>
     );
   }
 
   return (
     <View style={s.wrap}>
-      <Btn title="+ Post a trip" onPress={() => router.push("/post-trip")} kind="pink" />
-      <Btn title="My cars" onPress={() => router.push("/cars")} kind="ghost" />
+      <Btn title="+ Post a trip" onPress={() => router.push("/(driver)/post-trip")} kind="pink" />
+      <Btn title="My cars" onPress={() => router.push("/(driver)/cars")} kind="ghost" />
       <FlatList
         data={trips}
         keyExtractor={(t) => t.id}
@@ -53,7 +53,7 @@ export default function Drive(): React.JSX.Element {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={s.card}
-            onPress={() => router.push({ pathname: "/drive-trip/[id]", params: { id: item.id } })}
+            onPress={() => router.push({ pathname: "/(driver)/trip/[id]", params: { id: item.id } })}
           >
             <Text style={s.route}>
               {item.originLabel} → {item.destinationLabel}

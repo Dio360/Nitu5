@@ -9,9 +9,14 @@ const Gate: React.FC = () => {
 
   useEffect(() => {
     if (loading) return;
-    const onLogin = segments[0] === "login";
+    const top = segments[0];
+    const onLogin = top === "login";
     if (!user && !onLogin) router.replace("/login");
-    else if (user && onLogin) router.replace("/");
+    else if (user && onLogin) {
+      router.replace(user.role === "RIDER" ? "/(rider)/index" : "/(driver)/index");
+    } else if (user && !top) {
+      router.replace(user.role === "RIDER" ? "/(rider)/index" : "/(driver)/index");
+    }
   }, [user, loading, segments]);
 
   if (loading) {
@@ -23,17 +28,13 @@ const Gate: React.FC = () => {
   }
 
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ title: "Find a ride" }} />
-      <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="trip/[id]" options={{ title: "Trip" }} />
-      <Stack.Screen name="bookings" options={{ title: "My bookings" }} />
-      <Stack.Screen name="booking/[id]" options={{ title: "Booking" }} />
-      <Stack.Screen name="drive" options={{ title: "Drive & earn" }} />
-      <Stack.Screen name="cars" options={{ title: "My cars" }} />
-      <Stack.Screen name="post-trip" options={{ title: "Post a trip" }} />
-      <Stack.Screen name="drive-trip/[id]" options={{ title: "My trip" }} />
-      <Stack.Screen name="profile" options={{ title: "Profile" }} />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(rider)" />
+      <Stack.Screen name="(driver)" />
+      <Stack.Screen name="login" />
+      <Stack.Screen name="trip/[id]" options={{ headerShown: true, title: "Trip" }} />
+      <Stack.Screen name="booking/[id]" options={{ headerShown: true, title: "Booking" }} />
+      <Stack.Screen name="support" options={{ headerShown: true, title: "Help" }} />
     </Stack>
   );
 };
