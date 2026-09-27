@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { api, naira } from "@/api";
+import { pretty } from "@/theme";
 import { Btn } from "@/components/Btn";
 
 interface Booking {
@@ -47,7 +48,7 @@ export default function Bookings(): React.JSX.Element {
               {item.seats} seat(s) · offered {naira(item.offeredFareKobo)}
               {item.agreedFareKobo != null ? ` · agreed ${naira(item.agreedFareKobo)}` : ""}
             </Text>
-            <Text style={s.status}>{item.status}</Text>
+            <Text style={s.status}>{pretty(item.status)}</Text>
           </TouchableOpacity>
         )}
       />
@@ -57,21 +58,21 @@ export default function Bookings(): React.JSX.Element {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, padding: 16, backgroundColor: "#FFF9EF" },
-  empty: { textAlign: "center", color: "#6F6455", marginTop: 32 },
+  wrap: { flex: 1, padding: 16, backgroundColor: "#F3F1EE" },
+  empty: { textAlign: "center", color: "#787664", marginTop: 32 },
   card: {
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 16,
     padding: 14,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   route: { fontSize: 17, fontWeight: "800" },
-  meta: { fontSize: 13, color: "#6F6455", marginTop: 2 },
+  meta: { fontSize: 13, color: "#787664", marginTop: 2 },
   status: { fontSize: 15, fontWeight: "900", marginTop: 6 },
 });

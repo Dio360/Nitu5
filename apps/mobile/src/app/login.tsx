@@ -66,13 +66,13 @@ export default function Login(): React.JSX.Element {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, padding: 24, justifyContent: "center", backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, padding: 24, justifyContent: "center", backgroundColor: "#F3F1EE" },
   title: { fontSize: 40, fontWeight: "900" },
-  sub: { fontSize: 15, color: "#6F6455", marginBottom: 28 },
+  sub: { fontSize: 15, color: "#787664", marginBottom: 28 },
   label: { fontSize: 14, fontWeight: "700", marginBottom: 8 },
   input: {
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 12,
     padding: 12,
     fontSize: 17,

@@ -11,7 +11,7 @@ export default function DriverTabs(): React.JSX.Element {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#000",
-        tabBarInactiveTintColor: "#6F6455",
+        tabBarInactiveTintColor: "#787664",
         tabBarLabelStyle: { fontWeight: "800", fontSize: 12 },
       }}
     >

@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { api, naira } from "@/api";
+import { pretty } from "@/theme";
 import { Btn } from "@/components/Btn";
 
 interface Step {
@@ -79,7 +80,7 @@ export default function BookingDetails(): React.JSX.Element {
   return (
     <ScrollView style={s.wrap} contentContainerStyle={s.content}>
       <View style={s.card}>
-        <Text style={s.status}>{booking.status}</Text>
+        <Text style={s.status}>{pretty(booking.status)}</Text>
         <Text style={s.meta}>
           {booking.seats} seat(s) · offered {naira(booking.offeredFareKobo)}
         </Text>
@@ -91,11 +92,11 @@ export default function BookingDetails(): React.JSX.Element {
         <Text style={s.dname}>Price history</Text>
         {steps.map((st) => (
           <Text key={st.id} style={s.meta}>
-            {st.action} · {naira(st.amountKobo)} · {new Date(st.createdAt).toLocaleTimeString()}
+            {pretty(st.action)} · {naira(st.amountKobo)} · {new Date(st.createdAt).toLocaleTimeString()}
           </Text>
         ))}
       </View>
-      {booking.status === "COUNTERED" ? <Btn title="Accept counter" onPress={() => act("agree")} kind="pink" /> : null}
+      {booking.status === "COUNTERED" ? <Btn title="Accept counter" onPress={() => act("agree")} kind="green" /> : null}
       {booking.status === "CONFIRMED" ? (
         <View style={s.card}>
           <Text style={s.dname}>Check in with driver's code</Text>
@@ -119,27 +120,27 @@ export default function BookingDetails(): React.JSX.Element {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, backgroundColor: "#F3F1EE" },
   content: { padding: 16, paddingBottom: 40 },
   spin: { flex: 1 },
   card: {
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   status: { fontSize: 20, fontWeight: "900" },
   meta: { fontSize: 14, color: "#333", marginTop: 4 },
   dname: { fontSize: 17, fontWeight: "800", marginBottom: 6 },
   input: {
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 12,
     padding: 10,
     fontSize: 16,

@@ -64,22 +64,22 @@ export default function PostTrip(): React.JSX.Element {
         onChangeText={setFare}
         keyboardType="number-pad"
       />
-      <Btn title={busy ? "Posting…" : "Post trip"} onPress={post} disabled={busy} kind="pink" />
+      <Btn title={busy ? "Posting…" : "Post trip"} onPress={post} disabled={busy} kind="green" />
       {msg ? <Text style={s.msg}>{msg}</Text> : null}
     </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, backgroundColor: "#F3F1EE" },
   content: { padding: 16, paddingBottom: 40 },
   row: { flexDirection: "row", gap: 8, marginBottom: 12 },
   pick: { flex: 1, borderWidth: 2, borderColor: "#000", borderRadius: 12, padding: 12, alignItems: "center" },
   pickOn: { backgroundColor: "#FFC900" },
   picktxt: { fontWeight: "800" },
   input: {
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 12,
     padding: 10,
     fontSize: 16,

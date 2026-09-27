@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { api, naira } from "@/api";
+import { pretty } from "@/theme";
 import { Btn } from "@/components/Btn";
 
 interface Offer {
@@ -55,7 +56,7 @@ export default function Requests(): React.JSX.Element {
       <Text style={s.meta}>
         {o.rider.firstName} ⭐ {o.rider.rating ?? "new"} · {o.seats} seat(s) · offers {naira(o.offeredFareKobo)}
       </Text>
-      <Text style={s.status}>{o.status}</Text>
+      <Text style={s.status}>{pretty(o.status)}</Text>
       {(o.status === "OFFERED" || o.status === "COUNTERED") && (
         <>
           <View style={s.orow}>
@@ -107,20 +108,20 @@ export default function Requests(): React.JSX.Element {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, backgroundColor: "#F3F1EE" },
   content: { padding: 16, paddingBottom: 40 },
-  empty: { color: "#6F6455", marginBottom: 12 },
+  empty: { color: "#787664", marginBottom: 12 },
   card: {
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 16,
     padding: 14,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   route: { fontSize: 17, fontWeight: "800" },
   meta: { fontSize: 13, color: "#333", marginTop: 3 },
@@ -129,8 +130,8 @@ const s = StyleSheet.create({
   orow: { flexDirection: "row", gap: 8, marginTop: 8 },
   oflex: { flex: 1 },
   input: {
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 12,
     padding: 10,
     fontSize: 16,

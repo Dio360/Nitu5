@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { api, naira } from "@/api";
+import { pretty } from "@/theme";
 import { Btn } from "@/components/Btn";
 
 interface Offer {
@@ -95,7 +96,7 @@ export default function DriveTrip(): React.JSX.Element {
           {trip.originLabel} → {trip.destinationLabel}
         </Text>
         <Text style={s.meta}>
-          {new Date(trip.departureAt).toLocaleString()} · {trip.seatsBooked}/{trip.seatsTotal} taken · {trip.status}
+          {new Date(trip.departureAt).toLocaleString()} · {trip.seatsBooked}/{trip.seatsTotal} taken · {pretty(trip.status)}
         </Text>
       </View>
 
@@ -105,7 +106,7 @@ export default function DriveTrip(): React.JSX.Element {
         {code ? <Text style={s.code}>{code}</Text> : null}
         <Btn title="I'm here" onPress={() => act(`/trips/${id}/arriving`)} kind="ghost" />
         <Btn title="Start trip" onPress={() => act(`/trips/${id}/start`)} />
-        <Btn title="Finish trip" onPress={() => act(`/trips/${id}/complete`)} kind="pink" />
+        <Btn title="Finish trip" onPress={() => act(`/trips/${id}/complete`)} kind="green" />
       </View>
 
       <View style={s.card}>
@@ -116,7 +117,7 @@ export default function DriveTrip(): React.JSX.Element {
               {o.rider.firstName} ⭐ {o.rider.rating ?? "new"} · {o.seats} seat(s) · offers {naira(o.offeredFareKobo)}
             </Text>
             <Text style={s.meta}>
-              {o.status}
+              {pretty(o.status)}
               {o.agreedFareKobo != null
                 ? ` · agreed ${naira(o.agreedFareKobo)} (fee ${naira(o.commissionKobo)}, you keep ${naira(o.driverEarningsKobo)})`
                 : ""}
@@ -159,7 +160,7 @@ export default function DriveTrip(): React.JSX.Element {
         <Text style={s.dname}>Who is in my car ({manifest.length})</Text>
         {manifest.map((m) => (
           <Text key={m.id} style={s.meta}>
-            {m.rider.firstName} {m.rider.lastName} · {m.seats} seat(s) · {m.pickupLabel} → {m.dropoffLabel} · {m.status}
+            {m.rider.firstName} {m.rider.lastName} · {m.seats} seat(s) · {m.pickupLabel} → {m.dropoffLabel} · {pretty(m.status)}
           </Text>
         ))}
       </View>
@@ -169,20 +170,20 @@ export default function DriveTrip(): React.JSX.Element {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, backgroundColor: "#F3F1EE" },
   content: { padding: 16, paddingBottom: 40 },
   spin: { flex: 1 },
   card: {
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 16,
     padding: 14,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   route: { fontSize: 19, fontWeight: "900" },
   meta: { fontSize: 13, color: "#333", marginTop: 3 },
@@ -192,8 +193,8 @@ const s = StyleSheet.create({
   orow: { flexDirection: "row", gap: 8, marginTop: 8 },
   oflex: { flex: 1 },
   input: {
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 12,
     padding: 10,
     fontSize: 16,

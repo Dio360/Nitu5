@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Trip, api, naira } from "@/api";
+import { pretty } from "@/theme";
 import { Btn } from "@/components/Btn";
 
 type Pay = "CASH" | "WALLET";
@@ -38,7 +39,7 @@ export default function TripDetails(): React.JSX.Element {
           paymentMethod: pay,
         }),
       });
-      setMsg(`Offer sent (${res.status}). Watch My bookings for the driver's answer.`);
+      setMsg(`Offer sent. Watch My bookings for the driver's answer.`);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Offer failed");
     } finally {
@@ -56,7 +57,7 @@ export default function TripDetails(): React.JSX.Element {
         </Text>
         <Text style={s.meta}>{new Date(trip.departureAt).toLocaleString()}</Text>
         <Text style={s.meta}>
-          {trip.rideModel} · {trip.seatsLeft} of {trip.seatsTotal} seats left
+          {pretty(trip.rideModel)} · {trip.seatsLeft} of {trip.seatsTotal} seats left
         </Text>
         <Text style={s.fare}>
           {trip.rideModel === "SHARED"
@@ -68,7 +69,7 @@ export default function TripDetails(): React.JSX.Element {
         <Text style={s.dname}>
           {trip.driver.firstName} {trip.driver.lastName} ⭐ {trip.driver.rating ?? "new"}
         </Text>
-        <Text style={s.meta}>{trip.driver.verificationTier}</Text>
+        <Text style={s.meta}>{pretty(trip.driver.verificationTier)}</Text>
       </View>
       <View style={s.card}>
         <Text style={s.dname}>Offer your price (total, ₦)</Text>
@@ -93,7 +94,7 @@ export default function TripDetails(): React.JSX.Element {
             </TouchableOpacity>
           ))}
         </View>
-        <Btn title={busy ? "Sending…" : "Send offer"} onPress={offer} disabled={busy} kind="pink" />
+        <Btn title={busy ? "Sending…" : "Send offer"} onPress={offer} disabled={busy} kind="green" />
         {msg ? <Text style={s.msg}>{msg}</Text> : null}
       </View>
     </ScrollView>
@@ -101,28 +102,28 @@ export default function TripDetails(): React.JSX.Element {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, backgroundColor: "#F3F1EE" },
   content: { padding: 16, paddingBottom: 40 },
   spin: { flex: 1 },
   card: {
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   route: { fontSize: 20, fontWeight: "900" },
-  meta: { fontSize: 14, color: "#6F6455", marginTop: 4 },
+  meta: { fontSize: 14, color: "#787664", marginTop: 4 },
   fare: { fontSize: 22, fontWeight: "900", marginTop: 8 },
   dname: { fontSize: 17, fontWeight: "800", marginBottom: 8 },
   input: {
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 12,
     padding: 10,
     fontSize: 16,

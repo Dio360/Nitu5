@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { Trip, api, naira } from "@/api";
+import { pretty } from "@/theme";
 import { useAuth } from "@/auth";
 import { Btn } from "@/components/Btn";
 
@@ -157,7 +158,7 @@ export default function Home(): React.JSX.Element {
             🕑 {new Date(item.departureAt).toLocaleString()} · 💺 {item.seatsLeft} left
           </Text>
           <Text style={s.meta}>
-            {item.driver.firstName} ⭐ {item.driver.rating ?? "new"} · {item.driver.verificationTier}
+            {item.driver.firstName} ⭐ {item.driver.rating ?? "new"} · {pretty(item.driver.verificationTier)}
           </Text>
           <Text style={s.fare}>{fare(item)}</Text>
         </TouchableOpacity>
@@ -172,29 +173,29 @@ const greet = (): string => {
 };
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, backgroundColor: "#F3F1EE" },
   content: { padding: 16, paddingBottom: 40 },
   hello: { fontSize: 24, fontWeight: "900", marginBottom: 12 },
   where: {
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 16,
     padding: 14,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   wheretitle: { fontSize: 20, fontWeight: "900", marginBottom: 10 },
   input: {
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 12,
     padding: 10,
     fontSize: 16,
-    backgroundColor: "#FFF9EF",
+    backgroundColor: "#F3F1EE",
     marginBottom: 10,
   },
   row: { flexDirection: "row", gap: 8 },
@@ -204,38 +205,38 @@ const s = StyleSheet.create({
   cat: {
     flex: 1,
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 16,
     padding: 12,
     alignItems: "center",
     marginBottom: 12,
   },
-  catOn: { backgroundColor: "#FF90E8" },
+  catOn: { backgroundColor: "#34BB78" },
   catemoji: { fontSize: 26 },
   cattxt: { fontWeight: "900", fontSize: 16, marginTop: 4 },
-  catsub: { fontSize: 12, color: "#6F6455", fontWeight: "700" },
+  catsub: { fontSize: 12, color: "#787664", fontWeight: "700" },
   payrow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
   paytxt: { fontWeight: "800", fontSize: 15 },
   paylink: { fontWeight: "800", fontSize: 15 },
   recent: { marginBottom: 8 },
   recentitem: { fontSize: 16, fontWeight: "700", paddingVertical: 8 },
   dname: { fontSize: 17, fontWeight: "800", marginBottom: 4 },
-  count: { color: "#6F6455", fontWeight: "700", marginBottom: 8 },
+  count: { color: "#787664", fontWeight: "700", marginBottom: 8 },
   error: { color: "#E02020", fontWeight: "700", marginBottom: 8 },
   card: {
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 16,
     padding: 14,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   route: { fontSize: 17, fontWeight: "800" },
-  meta: { fontSize: 13, color: "#6F6455", marginTop: 2 },
+  meta: { fontSize: 13, color: "#787664", marginTop: 2 },
   fare: { fontSize: 18, fontWeight: "900", marginTop: 6 },
 });

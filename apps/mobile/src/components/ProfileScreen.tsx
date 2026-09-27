@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { User, api, naira } from "@/api";
+import { pretty } from "@/theme";
 import { useAuth } from "@/auth";
 import { Btn } from "@/components/Btn";
 
@@ -92,7 +93,7 @@ export default function Profile(): React.JSX.Element {
         </Text>
         <Text style={s.meta}>{me?.phone}</Text>
         <Text style={s.meta}>
-          {me?.role} · {me?.verificationTier} · ⭐ {me?.rating ?? "new"} · {me?.tripsCompleted} trips
+          {pretty(me?.role)} · {pretty(me?.verificationTier)} · ⭐ {me?.rating ?? "new"} · {me?.tripsCompleted} trips
         </Text>
       </View>
 
@@ -118,7 +119,7 @@ export default function Profile(): React.JSX.Element {
       <View style={s.card}>
         <Text style={s.dname}>Wallet: {wallet == null ? "…" : naira(wallet)}</Text>
         <TextInput style={s.input} placeholder="Top up amount, ₦" value={topup} onChangeText={setTopup} keyboardType="number-pad" />
-        <Btn title="Add test money" onPress={addMoney} kind="pink" />
+        <Btn title="Add test money" onPress={addMoney} kind="green" />
         {earn && (
           <Text style={s.meta}>
             Earned driving: {naira(earn.driving.netKobo)} · Spent riding: {naira(earn.riding.spentKobo)}
@@ -139,26 +140,26 @@ export default function Profile(): React.JSX.Element {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, backgroundColor: "#F3F1EE" },
   content: { padding: 16, paddingBottom: 40 },
   card: {
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 16,
     padding: 14,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   title: { fontSize: 20, fontWeight: "900" },
   dname: { fontSize: 17, fontWeight: "800", marginBottom: 8 },
-  meta: { fontSize: 13, color: "#6F6455", marginTop: 2 },
+  meta: { fontSize: 13, color: "#787664", marginTop: 2 },
   input: {
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 12,
     padding: 10,
     fontSize: 16,
@@ -168,8 +169,8 @@ const s = StyleSheet.create({
   msg: { fontWeight: "700", color: "#E02020", textAlign: "center", marginBottom: 8 },
   row: {
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 12,
     padding: 14,
     marginBottom: 10,

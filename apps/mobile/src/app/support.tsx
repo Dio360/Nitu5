@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { api } from "@/api";
+import { pretty } from "@/theme";
 import { Btn } from "@/components/Btn";
 
 interface Ticket {
@@ -73,7 +74,7 @@ export default function Support(): React.JSX.Element {
         <View style={s.card}>
           <Text style={s.title}>{item.subject}</Text>
           <Text style={s.meta}>
-            {item.category} · {item.status} · {new Date(item.createdAt).toLocaleDateString()}
+            {pretty(item.category)} · {pretty(item.status)} · {new Date(item.createdAt).toLocaleDateString()}
           </Text>
         </View>
       )}
@@ -82,26 +83,26 @@ export default function Support(): React.JSX.Element {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, backgroundColor: "#F3F1EE" },
   content: { padding: 16, paddingBottom: 40 },
-  empty: { textAlign: "center", color: "#6F6455", marginTop: 16 },
+  empty: { textAlign: "center", color: "#787664", marginTop: 16 },
   card: {
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 16,
     padding: 14,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   title: { fontSize: 17, fontWeight: "800", marginBottom: 8 },
-  meta: { fontSize: 13, color: "#6F6455", marginTop: 2 },
+  meta: { fontSize: 13, color: "#787664", marginTop: 2 },
   input: {
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 12,
     padding: 10,
     fontSize: 16,

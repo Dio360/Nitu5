@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { api, naira } from "@/api";
+import { pretty } from "@/theme";
 import { useAuth } from "@/auth";
 import { Btn } from "@/components/Btn";
 
@@ -65,7 +66,7 @@ export default function DriverHome(): React.JSX.Element {
             <Text style={s.big}>{net == null ? "…" : naira(net)}</Text>
             <Text style={s.meta}>Earned driving · {count ?? "…"} trips</Text>
           </View>
-          <Btn title="📥 Requests" onPress={() => router.push("/(driver)/requests")} kind="pink" />
+          <Btn title="📥 Requests" onPress={() => router.push("/(driver)/requests")} kind="green" />
           <Btn title="+ Post a trip" onPress={() => router.push("/(driver)/post-trip")} />
           <Btn title="My cars" onPress={() => router.push("/(driver)/cars")} kind="ghost" />
           <Text style={s.dname}>My trips</Text>
@@ -83,7 +84,7 @@ export default function DriverHome(): React.JSX.Element {
           <Text style={s.meta}>
             {new Date(item.departureAt).toLocaleString()} · {item.seatsBooked}/{item.seatsTotal} taken
           </Text>
-          <Text style={s.status}>{item.status}</Text>
+          <Text style={s.status}>{pretty(item.status)}</Text>
         </TouchableOpacity>
       )}
     />
@@ -91,25 +92,25 @@ export default function DriverHome(): React.JSX.Element {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: "#FFF9EF" },
+  wrap: { flex: 1, backgroundColor: "#F3F1EE" },
   content: { padding: 16, paddingBottom: 40 },
-  empty: { textAlign: "center", color: "#6F6455", marginTop: 16 },
+  empty: { textAlign: "center", color: "#787664", marginTop: 16 },
   card: {
     backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 1,
+    borderColor: "#E4E1D8",
     borderRadius: 16,
     padding: 14,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   big: { fontSize: 34, fontWeight: "900" },
   title: { fontSize: 19, fontWeight: "900" },
   route: { fontSize: 17, fontWeight: "800" },
-  meta: { fontSize: 13, color: "#6F6455", marginTop: 2 },
+  meta: { fontSize: 13, color: "#787664", marginTop: 2 },
   status: { fontSize: 15, fontWeight: "900", marginTop: 6 },
   dname: { fontSize: 17, fontWeight: "800", marginVertical: 8 },
 });
