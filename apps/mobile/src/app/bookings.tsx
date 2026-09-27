@@ -38,7 +38,7 @@ export default function Bookings(): React.JSX.Element {
         keyExtractor={(b) => b.id}
         ListEmptyComponent={!busy ? <Text style={s.empty}>No offers yet — find a ride first.</Text> : null}
         renderItem={({ item }) => (
-          <TouchableOpacity style={s.card} onPress={() => router.push(`/booking/${item.id}`)}>
+          <TouchableOpacity style={s.card} onPress={() => router.push({ pathname: "/booking/[id]", params: { id: item.id } })}>
             <Text style={s.route}>
               {item.trip.originLabel} → {item.trip.destinationLabel}
             </Text>

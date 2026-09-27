@@ -57,7 +57,7 @@ export default function Search(): React.JSX.Element {
         style={s.list}
         ListEmptyComponent={!busy ? <Text style={s.empty}>No rides yet — try clearing the boxes.</Text> : null}
         renderItem={({ item }) => (
-          <TouchableOpacity style={s.card} onPress={() => router.push(`/trip/${item.id}`)}>
+          <TouchableOpacity style={s.card} onPress={() => router.push({ pathname: "/trip/[id]", params: { id: item.id } })}>
             <Text style={s.route}>
               {item.originLabel} → {item.destinationLabel}
             </Text>
