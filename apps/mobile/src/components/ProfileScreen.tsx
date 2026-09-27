@@ -1,33 +1,21 @@
 import React, { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
-import { User, api, naira } from "@/api";
+import { User, api } from "@/api";
 import { pretty } from "@/theme";
 import { useAuth } from "@/auth";
 import { Btn } from "@/components/Btn";
 
+/** Bolt-style account: who I am, my money, my car papers, how to earn. */
 export default function Profile(): React.JSX.Element {
   const { user, login, logout, reload } = useAuth();
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
-  const [topup, setTopup] = useState("");
-  const [wallet, setWallet] = useState<number | null>(null);
-  const [earn, setEarn] = useState<{ driving: { netKobo: number }; riding: { spentKobo: number } } | null>(null);
+  const [editing, setEditing] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const load = useCallback(async () => {
-    await reload().catch(() => {});
-    try {
-      const w = await api<{ balanceKobo: number }>("/wallet/mine");
-      setWallet(w.balanceKobo);
-    } catch {
-      setWallet(null);
-    }
-    try {
-      setEarn(await api<{ driving: { netKobo: number }; riding: { spentKobo: number } }>("/earnings/me"));
-    } catch {
-      setEarn(null);
-    }
+  const load = useCallback(() => {
+    reload().catch(() => {});
   }, [reload]);
 
   useFocusEffect(
@@ -37,25 +25,31 @@ export default function Profile(): React.JSX.Element {
   );
 
   const me: User | null = user;
+  const isDriver = me?.role !== "RIDER";
 
   const saveName = async (): Promise<void> => {
     setMsg("");
     try {
-      await api("/me", { method: "PATCH", body: JSON.stringify({ firstName: first || undefined, lastName: last || undefined }) });
+      await api("/me", {
+        method: "PATCH",
+        body: JSON.stringify({ firstName: first || undefined, lastName: last || undefined }),
+      });
       setFirst("");
       setLast("");
+      setEditing(false);
       await reload();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Failed");
     }
   };
 
-  const switchRole = async (role: "RIDER" | "PRIVATE_DRIVER"): Promise<void> => {
+  const becomeDriver = async (): Promise<void> => {
     setMsg("");
     try {
       if (!me) return;
-      await api("/me", { method: "PATCH", body: JSON.stringify({ role }) });
+      await api("/me", { method: "PATCH", body: JSON.stringify({ role: "PRIVATE_DRIVER" }) });
       await login(me.phone, "000000"); // fresh login so the app sees the new role
+      router.replace("/(driver)");
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Failed");
     }
@@ -71,69 +65,58 @@ export default function Profile(): React.JSX.Element {
     }
   };
 
-  const addMoney = async (): Promise<void> => {
-    setMsg("");
-    try {
-      const res = await api<{ balanceKobo: number }>("/wallet/topup", {
-        method: "POST",
-        body: JSON.stringify({ amountKobo: Math.round(Number(topup) * 100) }),
-      });
-      setWallet(res.balanceKobo);
-      setTopup("");
-    } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Failed");
-    }
-  };
+  const row = (emoji: string, label: string, sub: string, go: () => void): React.JSX.Element => (
+    <TouchableOpacity style={s.row} onPress={go}>
+      <Text style={s.rowemoji}>{emoji}</Text>
+      <View style={s.rowbody}>
+        <Text style={s.rowtxt}>{label}</Text>
+        <Text style={s.rowsub}>{sub}</Text>
+      </View>
+      <Text style={s.rowarrow}>›</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <ScrollView style={s.wrap} contentContainerStyle={s.content}>
-      <View style={s.card}>
-        <Text style={s.title}>
-          {me?.firstName} {me?.lastName}
-        </Text>
-        <Text style={s.meta}>{me?.phone}</Text>
-        <Text style={s.meta}>
-          {pretty(me?.role)} · {pretty(me?.verificationTier)} · ⭐ {me?.rating ?? "new"} · {me?.tripsCompleted} trips
-        </Text>
-      </View>
-
-      <View style={s.card}>
-        <Text style={s.dname}>Edit name</Text>
-        <TextInput style={s.input} placeholder="First name" value={first} onChangeText={setFirst} />
-        <TextInput style={s.input} placeholder="Last name" value={last} onChangeText={setLast} />
-        <Btn title="Save name" onPress={saveName} kind="ghost" />
-      </View>
-
-      <View style={s.card}>
-        <Text style={s.dname}>I am a…</Text>
-        <Btn title="Rider" kind={me?.role === "RIDER" ? "dark" : "ghost"} onPress={() => switchRole("RIDER")} />
-        <Btn title="Driver" kind={me?.role !== "RIDER" ? "dark" : "ghost"} onPress={() => switchRole("PRIVATE_DRIVER")} />
-      </View>
-
-      <View style={s.card}>
-        <Text style={s.dname}>Verification</Text>
-        <Btn title="Verify identity (L2)" onPress={() => verify("L2_IDENTITY")} kind="ghost" />
-        <Btn title="Verify car (L3)" onPress={() => verify("L3_DRIVER_VEHICLE")} kind="ghost" />
-      </View>
-
-      <View style={s.card}>
-        <Text style={s.dname}>Wallet: {wallet == null ? "…" : naira(wallet)}</Text>
-        <TextInput style={s.input} placeholder="Top up amount, ₦" value={topup} onChangeText={setTopup} keyboardType="number-pad" />
-        <Btn title="Add test money" onPress={addMoney} kind="green" />
-        {earn && (
-          <Text style={s.meta}>
-            Earned driving: {naira(earn.driving.netKobo)} · Spent riding: {naira(earn.riding.spentKobo)}
+      <View style={s.head}>
+        <View style={s.avatar}>
+          <Text style={s.avatarTxt}>{(me?.firstName?.[0] ?? "?").toUpperCase()}</Text>
+        </View>
+        <View style={s.headbody}>
+          <Text style={s.name}>
+            {me?.firstName} {me?.lastName}
           </Text>
-        )}
+          <Text style={s.meta}>{me?.phone}</Text>
+          <Text style={s.meta}>
+            ⭐ {me?.rating ?? "new"} · {me?.tripsCompleted} trips · {pretty(me?.verificationTier)}
+          </Text>
+        </View>
+        <TouchableOpacity onPress={() => setEditing((v) => !v)}>
+          <Text style={s.edit}>Edit</Text>
+        </TouchableOpacity>
       </View>
+
+      {editing ? (
+        <View style={s.card}>
+          <TextInput style={s.input} placeholder="First name" value={first} onChangeText={setFirst} />
+          <TextInput style={s.input} placeholder="Last name" value={last} onChangeText={setLast} />
+          <Btn title="Save" onPress={saveName} kind="ghost" />
+        </View>
+      ) : null}
+
+      {row("💳", "Payments", "Wallet, top-ups, earnings", () => router.push("/payments"))}
+      {row("🛡", "Verification", pretty(me?.verificationTier), () => {})}
+      <View style={s.card}>
+        <Btn title="Verify my ID" onPress={() => verify("L2_IDENTITY")} kind="ghost" />
+        <Btn title="Verify my car" onPress={() => verify("L3_DRIVER_VEHICLE")} kind="ghost" />
+      </View>
+      {row("🧰", "Services", "Rides, help, more", () => router.push("/(rider)/services"))}
+      {row("🆘", "Help & lost items", "Talk to support", () => router.push("/support"))}
+      {isDriver
+        ? row("🚗", "Nitu5 Driver", "Open Drive & Earn", () => router.push("/(driver)"))
+        : row("💰", "Earn with Nitu5", "Become a driver", becomeDriver)}
 
       {msg ? <Text style={s.msg}>{msg}</Text> : null}
-      <TouchableOpacity style={s.row} onPress={() => router.push("/(rider)/services")}>
-        <Text style={s.rowtxt}>🧰 More services ›</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={s.row} onPress={() => router.push("/support")}>
-        <Text style={s.rowtxt}>🆘 Help & lost items ›</Text>
-      </TouchableOpacity>
       <Btn title="Log out" onPress={logout} kind="danger" />
     </ScrollView>
   );
@@ -142,6 +125,20 @@ export default function Profile(): React.JSX.Element {
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: "#F3F1EE" },
   content: { padding: 16, paddingBottom: 40 },
+  head: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#11190C",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarTxt: { color: "#fff", fontSize: 24, fontWeight: "900" },
+  headbody: { flex: 1, marginLeft: 12 },
+  name: { fontSize: 20, fontWeight: "900" },
+  meta: { fontSize: 13, color: "#787664", marginTop: 2 },
+  edit: { fontWeight: "800", fontSize: 15 },
   card: {
     backgroundColor: "#fff",
     borderWidth: 1,
@@ -154,12 +151,24 @@ const s = StyleSheet.create({
     shadowOpacity: 0.06,
     elevation: 2,
   },
-  title: { fontSize: 20, fontWeight: "900" },
-  dname: { fontSize: 17, fontWeight: "800", marginBottom: 8 },
-  meta: { fontSize: 13, color: "#787664", marginTop: 2 },
-  input: {
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#E4E1D8",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+  },
+  rowemoji: { fontSize: 24 },
+  rowbody: { flex: 1, marginLeft: 12 },
+  rowtxt: { fontSize: 16, fontWeight: "800" },
+  rowsub: { fontSize: 13, color: "#787664", marginTop: 2 },
+  rowarrow: { fontSize: 22, color: "#787664", fontWeight: "800" },
+  input: {
+    borderWidth: 1,
+    borderColor: "#CFCFCB",
     borderRadius: 12,
     padding: 10,
     fontSize: 16,
@@ -167,13 +176,4 @@ const s = StyleSheet.create({
     marginBottom: 10,
   },
   msg: { fontWeight: "700", color: "#E02020", textAlign: "center", marginBottom: 8 },
-  row: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#E4E1D8",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-  },
-  rowtxt: { fontSize: 16, fontWeight: "800" },
 });
